@@ -42,4 +42,9 @@ public class UserService {
         user.setRole(UserRole.CUSTOMER);
         return user;
     }
+
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email.trim());
+    }
+
 }
