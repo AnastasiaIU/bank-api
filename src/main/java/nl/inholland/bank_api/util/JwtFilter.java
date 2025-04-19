@@ -64,7 +64,7 @@ public class JwtFilter extends OncePerRequestFilter{
     }
 
     @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+    protected boolean shouldNotFilter(HttpServletRequest request) {
         String requestURI = request.getRequestURI();
         return requestURI.equals("/users/login");  // Skip filter for /users/login
     }
