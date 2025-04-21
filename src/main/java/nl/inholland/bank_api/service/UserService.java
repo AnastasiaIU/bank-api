@@ -42,4 +42,22 @@ public class UserService {
         user.setRole(UserRole.CUSTOMER);
         return user;
     }
+
+    public UserDTO toUserDTO(User user) {
+        UserDTO dto = new UserDTO();
+        dto.id = user.getId();
+        dto.firstName = user.getFirstName();
+        dto.lastName = user.getLastName();
+        dto.email = user.getEmail();
+        dto.phoneNumber = user.getPhoneNumber();
+        dto.bsn = user.getBsn();
+        dto.isApproved = user.isApproved();
+        dto.role = user.getRole().name();
+        return dto;
+    }
+
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email.trim());
+    }
+
 }
