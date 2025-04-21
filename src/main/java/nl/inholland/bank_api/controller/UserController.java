@@ -56,6 +56,8 @@ public class UserController {
         String email = authentication.getName(); // comes from JWT
         User user = userService.findByEmail(email);
 
-        return ResponseEntity.status(200).body(user);
+        UserDTO userDTO = userService.toUserDTO(user);
+
+        return ResponseEntity.status(201).body(userDTO);
     }
 }

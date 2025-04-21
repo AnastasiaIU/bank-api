@@ -28,4 +28,5 @@ public class UserDTO {
 
     public boolean isApproved;
     public String role;
+    public Long id;
 }
