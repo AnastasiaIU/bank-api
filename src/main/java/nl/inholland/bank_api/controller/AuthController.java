@@ -3,6 +3,7 @@ package nl.inholland.bank_api.controller;
 import jakarta.validation.Valid;
 import nl.inholland.bank_api.model.dto.LoginRequest;
 import nl.inholland.bank_api.model.dto.LoginResponse;
+import nl.inholland.bank_api.model.dto.ResponseIdDTO;
 import nl.inholland.bank_api.model.dto.UserDTO;
 import nl.inholland.bank_api.model.entities.User;
 import nl.inholland.bank_api.service.UserService;
@@ -13,7 +14,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 
-import java.util.Collections;
 
 @RestController
 @RequestMapping("auth")
@@ -30,9 +30,9 @@ public class AuthController {
     }
 
     @PostMapping("register")
-    public ResponseEntity<?> register(@Valid @RequestBody UserDTO dto) {
+    public ResponseEntity<ResponseIdDTO> register(@Valid @RequestBody UserDTO dto) {
         Long id = userService.add(dto);
-        return ResponseEntity.status(201).body(Collections.singletonMap("id", id));
+        return ResponseEntity.status(201).body(new ResponseIdDTO(id));
     }
 
     @PostMapping("login")
