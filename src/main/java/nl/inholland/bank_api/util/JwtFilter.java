@@ -72,7 +72,7 @@ public class JwtFilter extends OncePerRequestFilter{
                 || path.startsWith("/swagger-ui")
                 || path.startsWith("/v3/api-docs")
                 || path.startsWith("/h2-console")
-                || path.startsWith("/transactions/user");
+                || path.startsWith("/transactions/account");
     }
 
 }
