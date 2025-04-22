@@ -5,6 +5,8 @@ import nl.inholland.bank_api.model.entities.Account;
 import nl.inholland.bank_api.repository.AccountRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class AccountService {
     private final AccountRepository accountRepository;
@@ -20,6 +22,14 @@ public class AccountService {
 
     public Account fetchAccountById(Long id) {
         return accountRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Account not found with ID: " + id));
+    }
+
+    public List<AccountDTO> fetchAccountsByUserId(Long userId) {
+        List<Account> accounts = accountRepository.findByUserId(userId);
+
+        return accounts.stream()
+                .map(this::toDTO)
+                .toList();
     }
 
     private AccountDTO toDTO(Account account) {
