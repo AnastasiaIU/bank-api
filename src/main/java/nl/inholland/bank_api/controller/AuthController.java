@@ -16,13 +16,13 @@ import org.springframework.security.core.Authentication;
 import java.util.Collections;
 
 @RestController
-@RequestMapping("users")
-public class UserController {
+@RequestMapping("auth")
+public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
     private final UserService userService;
 
-    public UserController(UserService userService, AuthenticationManager authenticationManager,
+    public AuthController(UserService userService, AuthenticationManager authenticationManager,
                           JwtUtil jwtUtil) {
         this.userService = userService;
         this.authenticationManager = authenticationManager;
@@ -31,7 +31,7 @@ public class UserController {
 
     @PostMapping("register")
     public ResponseEntity<?> register(@Valid @RequestBody UserDTO dto) {
-        Long id = userService.register(dto);
+        Long id = userService.add(dto);
         return ResponseEntity.status(201).body(Collections.singletonMap("id", id));
     }
 

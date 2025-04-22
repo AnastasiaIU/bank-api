@@ -3,7 +3,6 @@ package nl.inholland.bank_api.config;
 import nl.inholland.bank_api.util.JwtFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -31,8 +30,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(
                         auth -> auth
                                 .requestMatchers(
-                                        new AntPathRequestMatcher("/users/register"),
-                                        new AntPathRequestMatcher("/users/login"),
+                                        new AntPathRequestMatcher("/auth/register"),
+                                        new AntPathRequestMatcher("/auth/login"),
                                         new AntPathRequestMatcher("/swagger-ui/**"),
                                         new AntPathRequestMatcher("/v3/api-docs/**"),
                                         new AntPathRequestMatcher("/h2-console/**")
