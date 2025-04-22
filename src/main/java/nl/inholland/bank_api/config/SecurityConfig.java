@@ -34,7 +34,8 @@ public class SecurityConfig {
                                         new AntPathRequestMatcher("/auth/login"),
                                         new AntPathRequestMatcher("/swagger-ui/**"),
                                         new AntPathRequestMatcher("/v3/api-docs/**"),
-                                        new AntPathRequestMatcher("/h2-console/**")
+                                        new AntPathRequestMatcher("/h2-console/**"),
+                                        new AntPathRequestMatcher("/transactions/user/**")
                                 ).permitAll() // Public endpoints
                                 .anyRequest().authenticated() // All other endpoints require auth
                 )
