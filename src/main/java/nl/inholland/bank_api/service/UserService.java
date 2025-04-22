@@ -18,7 +18,7 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public Long register(UserDTO dto) {
+    public Long add(UserDTO dto) {
         if (userRepository.existsByEmail(dto.email.trim())) {
             throw new IllegalArgumentException("Email already exists");
         }

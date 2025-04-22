@@ -3,6 +3,7 @@ package nl.inholland.bank_api.controller;
 import jakarta.validation.Valid;
 import nl.inholland.bank_api.model.dto.LoginRequest;
 import nl.inholland.bank_api.model.dto.LoginResponse;
+import nl.inholland.bank_api.model.dto.ResponseIdDTO;
 import nl.inholland.bank_api.model.dto.UserDTO;
 import nl.inholland.bank_api.model.entities.User;
 import nl.inholland.bank_api.service.UserService;
@@ -13,16 +14,15 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 
-import java.util.Collections;
 
 @RestController
-@RequestMapping("users")
-public class UserController {
+@RequestMapping("auth")
+public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
     private final UserService userService;
 
-    public UserController(UserService userService, AuthenticationManager authenticationManager,
+    public AuthController(UserService userService, AuthenticationManager authenticationManager,
                           JwtUtil jwtUtil) {
         this.userService = userService;
         this.authenticationManager = authenticationManager;
@@ -30,9 +30,9 @@ public class UserController {
     }
 
     @PostMapping("register")
-    public ResponseEntity<?> register(@Valid @RequestBody UserDTO dto) {
-        Long id = userService.register(dto);
-        return ResponseEntity.status(201).body(Collections.singletonMap("id", id));
+    public ResponseEntity<ResponseIdDTO> register(@Valid @RequestBody UserDTO dto) {
+        Long id = userService.add(dto);
+        return ResponseEntity.status(201).body(new ResponseIdDTO(id));
     }
 
     @PostMapping("login")
