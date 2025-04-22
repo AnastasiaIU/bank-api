@@ -19,7 +19,7 @@ public class TransactionController {
         this.transactionService = transactionService;
     }
 
-    @PostMapping("post-transaction")
+    @PostMapping
     public ResponseEntity<?> postTransaction(@Valid @RequestBody TransactionDTO dto) {
         Long id = transactionService.postTransaction(dto);
         return ResponseEntity.status(201).body(Collections.singletonMap("id", id));
