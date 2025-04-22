@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("accounts")
 public class AccountController {
@@ -19,5 +21,10 @@ public class AccountController {
     @GetMapping("/{iban}")
     public AccountDTO fetchAccountByIban(@PathVariable String iban) {
         return accountService.fetchAccountByIban(iban);
+    }
+
+    @GetMapping("/user/{userId}")
+    public List<AccountDTO> fetchAccountsByUserId(@PathVariable Long userId) {
+        return accountService.fetchAccountsByUserId(userId);
     }
 }
