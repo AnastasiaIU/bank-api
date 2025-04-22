@@ -6,6 +6,8 @@ import nl.inholland.bank_api.model.entities.Transaction;
 import nl.inholland.bank_api.repository.TransactionRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class TransactionService {
     private final TransactionRepository transactionRepository;
@@ -33,4 +35,9 @@ public class TransactionService {
 
         return transaction;
     }
+
+    public List<Transaction> getTransactionsForAccount(Long accountId) {
+        return transactionRepository.findBySourceAccount_IdOrTargetAccount_Id(accountId, accountId);
+    }
+
 }

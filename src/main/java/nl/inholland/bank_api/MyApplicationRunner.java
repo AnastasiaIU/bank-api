@@ -2,10 +2,12 @@ package nl.inholland.bank_api;
 
 import jakarta.transaction.Transactional;
 import nl.inholland.bank_api.model.entities.Account;
+import nl.inholland.bank_api.model.entities.Transaction;
 import nl.inholland.bank_api.model.entities.User;
 import nl.inholland.bank_api.model.enums.AccountType;
 import nl.inholland.bank_api.model.enums.UserRole;
 import nl.inholland.bank_api.repository.AccountRepository;
+import nl.inholland.bank_api.repository.TransactionRepository;
 import nl.inholland.bank_api.repository.UserRepository;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Component
@@ -21,11 +24,13 @@ public class MyApplicationRunner implements ApplicationRunner {
     private final UserRepository userRepository;
     private final AccountRepository accountRepository;
     private final PasswordEncoder passwordEncoder;
+    private final TransactionRepository transactionRepository;
 
-    public MyApplicationRunner(UserRepository userRepository, AccountRepository accountRepository, PasswordEncoder passwordEncoder) {
+    public MyApplicationRunner(UserRepository userRepository, AccountRepository accountRepository, PasswordEncoder passwordEncoder, TransactionRepository transactionRepository) {
         this.userRepository = userRepository;
         this.accountRepository = accountRepository;
         this.passwordEncoder = passwordEncoder;
+        this.transactionRepository = transactionRepository;
     }
 
     @Override
@@ -58,13 +63,31 @@ public class MyApplicationRunner implements ApplicationRunner {
 
         User john = users.get(1);
 
-        accountRepository.saveAll(
+        Account checking = Account.builder()
+                .user(john)
+                .iban("NL91ABNA0417164300")
+                .type(AccountType.CHECKING)
+                .balance(BigDecimal.valueOf(10000.00))
+                .build();
+
+        Account savings = Account.builder()
+                .user(john)
+                .iban("NL91ABNA0417164301")
+                .type(AccountType.SAVINGS)
+                .balance(BigDecimal.valueOf(50000.00))
+                .build();
+
+
+        accountRepository.saveAll(List.of(checking, savings));
+
+        transactionRepository.saveAll(
                 List.of(
-                        Account.builder()
-                                .user(john)
-                                .iban("NL91ABNA0417164300")
-                                .type(AccountType.CHECKING)
-                                .balance(BigDecimal.valueOf(10000.00))
+                        Transaction.builder()
+                                .amount(BigDecimal.valueOf(250.00))
+                                .description("Transfer from checking to savings")
+                                .sourceAccount(checking)
+                                .targetAccount(savings)
+                                .timestamp(LocalDateTime.now())
                                 .build()
                 )
         );
