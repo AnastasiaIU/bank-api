@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("accounts")
 public class AccountController {
     private final AccountService accountService;
 
@@ -19,13 +18,13 @@ public class AccountController {
         this.accountService = accountService;
     }
 
-    @GetMapping("/{iban}")
+    @GetMapping("/accounts/{iban}")
     public ResponseEntity<AccountDTO> fetchAccountByIban(@PathVariable String iban) {
         AccountDTO account = accountService.fetchAccountByIban(iban);
         return ResponseEntity.ok(account);
     }
 
-    @GetMapping("/{userId}/user")
+    @GetMapping("/users/{userId}/accounts")
     public ResponseEntity<List<AccountDTO>> fetchAccountsByUserId(@PathVariable Long userId) {
         List<AccountDTO> accounts =  accountService.fetchAccountsByUserId(userId);
         return ResponseEntity.ok(accounts);
