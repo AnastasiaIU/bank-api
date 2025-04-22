@@ -25,8 +25,9 @@ public class AccountController {
         return ResponseEntity.ok(account);
     }
 
-    @GetMapping("/user/{userId}")
-    public List<AccountDTO> fetchAccountsByUserId(@PathVariable Long userId) {
-        return accountService.fetchAccountsByUserId(userId);
+    @GetMapping("/{userId}/user")
+    public ResponseEntity<List<AccountDTO>> fetchAccountsByUserId(@PathVariable Long userId) {
+        List<AccountDTO> accounts =  accountService.fetchAccountsByUserId(userId);
+        return ResponseEntity.ok(accounts);
     }
 }
