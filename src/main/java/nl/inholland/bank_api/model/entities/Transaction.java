@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import nl.inholland.bank_api.model.enums.Status;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
@@ -22,11 +23,11 @@ public class Transaction {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(nullable = false)
+    @JoinColumn()
     private Account sourceAccount;
 
     @ManyToOne
-    @JoinColumn(nullable = false)
+    @JoinColumn()
     private Account targetAccount;
 
     @Column(nullable = false)
@@ -38,4 +39,7 @@ public class Transaction {
 
     @Column()
     private String description;
+
+    @Column()
+    private Status status;
 }
