@@ -21,7 +21,7 @@ public class AccountController {
 
     @GetMapping("/{iban}")
     public ResponseEntity<AccountDTO> fetchAccountByIban(@PathVariable String iban) {
-        AccountDTO account = accountService.fetchAccountByIban(iban);
+        AccountDTO account = accountService.fetchAccountDTOByIban(iban);
         return ResponseEntity.ok(account);
     }
 
