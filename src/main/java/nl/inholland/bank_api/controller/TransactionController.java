@@ -11,7 +11,7 @@ import java.util.Collections;
 import java.util.List;
 
 @RestController
-@RequestMapping("transactions")
+@RequestMapping
 public class TransactionController {
     private final TransactionService transactionService;
 
@@ -19,13 +19,13 @@ public class TransactionController {
         this.transactionService = transactionService;
     }
 
-    @PostMapping
+    @PostMapping("/transactions")
     public ResponseEntity<?> postTransaction(@Valid @RequestBody TransactionRequestDTO dto) {
         Long id = transactionService.postTransaction(dto);
         return ResponseEntity.status(201).body(Collections.singletonMap("id", id));
     }
 
-    @GetMapping("account/{accountId}")
+    @GetMapping("/accounts/{accountId}/transactions")
     public ResponseEntity<List<Transaction>> getTransactionsByAccount(@PathVariable Long accountId) {
         List<Transaction> transactions = transactionService.getTransactionsForAccount(accountId);
         return ResponseEntity.ok(transactions);
