@@ -1,11 +1,14 @@
 package nl.inholland.bank_api.service;
 
-import nl.inholland.bank_api.model.dto.TransactionDTO;
+import nl.inholland.bank_api.model.dto.TransactionRequestDTO;
 import nl.inholland.bank_api.model.entities.Account;
 import nl.inholland.bank_api.model.entities.Transaction;
+import nl.inholland.bank_api.model.enums.Operation;
+import nl.inholland.bank_api.model.enums.Status;
 import nl.inholland.bank_api.repository.TransactionRepository;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -18,20 +21,28 @@ public class TransactionService {
         this.accountService = accountService;
     }
 
-    public Long postTransaction(TransactionDTO dto) {
+    public Long postTransaction(TransactionRequestDTO dto) {
         return transactionRepository.save(toTransaction(dto)).getId();
     }
 
-    private Transaction toTransaction(TransactionDTO dto) {
+    private Transaction toTransaction(TransactionRequestDTO dto) {
         Transaction transaction = new Transaction();
 
-        Account sourceAccount = accountService.fetchAccountById(dto.sourceAccount);
-        Account targetAccount = accountService.fetchAccountById(dto.targetAccount);
+        Account sourceAccount = accountService.fetchAccountByIban(dto.sourceAccount);
+        Account targetAccount = accountService.fetchAccountByIban(dto.targetAccount);
 
         transaction.setSourceAccount(sourceAccount);
         transaction.setTargetAccount(targetAccount);
         transaction.setAmount(dto.amount);
         transaction.setDescription(dto.description);
+
+        if (isTransactionSuccessful(sourceAccount, targetAccount, dto.amount)) {
+            transaction.setStatus(Status.SUCCEED);
+            accountService.updateBalance(sourceAccount, dto.amount, Operation.SUBTRACTION);
+            accountService.updateBalance(targetAccount, dto.amount, Operation.ADDITION);
+        } else {
+            transaction.setStatus(Status.FAILED);
+        }
 
         return transaction;
     }
@@ -40,4 +51,10 @@ public class TransactionService {
         return transactionRepository.findBySourceAccount_IdOrTargetAccount_Id(accountId, accountId);
     }
 
+    private boolean isTransactionSuccessful(Account sourceAccount, Account targetAccount, BigDecimal amount) {
+        return sourceAccount != null &&
+                targetAccount != null &&
+                sourceAccount != targetAccount &&
+                sourceAccount.getBalance().compareTo(amount) > 0;
+    }
 }
