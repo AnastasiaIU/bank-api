@@ -2,7 +2,6 @@ package nl.inholland.bank_api.controller;
 
 import jakarta.validation.Valid;
 import nl.inholland.bank_api.model.dto.TransactionRequestDTO;
-import nl.inholland.bank_api.model.dto.TransactionResponseDTO;
 import nl.inholland.bank_api.model.entities.Transaction;
 import nl.inholland.bank_api.service.TransactionService;
 import org.springframework.http.ResponseEntity;
