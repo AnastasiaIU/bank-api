@@ -20,11 +20,11 @@ public class UserService {
 
     public Long add(UserDTO dto) {
         if (userRepository.existsByEmail(dto.email.trim())) {
-            throw new IllegalArgumentException("Email already exists");
+            throw new IllegalArgumentException("email: Email already exists");
         }
 
         if (userRepository.existsByBsn(dto.bsn.trim())) {
-            throw new IllegalArgumentException("BSN already exists");
+            throw new IllegalArgumentException("bsn: BSN already exists");
         }
 
         return userRepository.save(toUser(dto)).getId();
