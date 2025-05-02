@@ -3,7 +3,7 @@ package nl.inholland.bank_api.model.dto;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
-public class LoginRequest {
+public class LoginRequestDTO {
     @NotBlank(message = "Email is required")
     @Email(message = "Incorrect email format")
     public String email;
