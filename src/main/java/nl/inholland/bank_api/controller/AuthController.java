@@ -1,8 +1,8 @@
 package nl.inholland.bank_api.controller;
 
 import jakarta.validation.Valid;
-import nl.inholland.bank_api.model.dto.LoginRequest;
-import nl.inholland.bank_api.model.dto.LoginResponse;
+import nl.inholland.bank_api.model.dto.LoginRequestDTO;
+import nl.inholland.bank_api.model.dto.LoginResponseDTO;
 import nl.inholland.bank_api.model.dto.ResponseIdDTO;
 import nl.inholland.bank_api.model.dto.UserDTO;
 import nl.inholland.bank_api.model.entities.User;
@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-
 
 @RestController
 @RequestMapping("auth")
@@ -36,7 +35,7 @@ public class AuthController {
     }
 
     @PostMapping("login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequestDTO request) {
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.email, request.password)
@@ -44,8 +43,9 @@ public class AuthController {
 
             User user = userService.findByEmail(request.email.trim());
             String token = jwtUtil.generateToken(user.getEmail(), user.getRole().name());
+            UserDTO userDTO = userService.toUserDTO(user);
 
-            return ResponseEntity.ok(new LoginResponse(token));
+            return ResponseEntity.ok(new LoginResponseDTO(token, userDTO));
         } catch (Exception e) {
             return ResponseEntity.status(401).body("Invalid username or password");
         }
@@ -58,6 +58,6 @@ public class AuthController {
 
         UserDTO userDTO = userService.toUserDTO(user);
 
-        return ResponseEntity.status(201).body(userDTO);
+        return ResponseEntity.ok(userDTO);
     }
 }
