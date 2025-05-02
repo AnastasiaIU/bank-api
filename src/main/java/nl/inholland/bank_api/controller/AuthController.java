@@ -42,11 +42,6 @@ public class AuthController {
             );
 
             User user = userService.findByEmail(request.email.trim());
-
-            if (!user.isApproved()) {
-                return ResponseEntity.status(403).body("Can't login, you are not approved yet.");
-            }
-
             String token = jwtUtil.generateToken(user.getEmail(), user.getRole().name());
             UserDTO userDTO = userService.toUserDTO(user);
 
