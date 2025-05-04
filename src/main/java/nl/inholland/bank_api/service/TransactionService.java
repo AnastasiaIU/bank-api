@@ -1,6 +1,7 @@
 package nl.inholland.bank_api.service;
 
 import nl.inholland.bank_api.model.dto.TransactionRequestDTO;
+import nl.inholland.bank_api.model.dto.TransactionResponseDTO;
 import nl.inholland.bank_api.model.entities.Account;
 import nl.inholland.bank_api.model.entities.Transaction;
 import nl.inholland.bank_api.model.enums.Operation;
@@ -47,8 +48,11 @@ public class TransactionService {
         return transaction;
     }
 
-    public List<Transaction> getTransactionsForAccount(Long accountId) {
-        return transactionRepository.findBySourceAccount_IdOrTargetAccount_Id(accountId, accountId);
+    public List<TransactionResponseDTO> getTransactionsForAccount(Long accountId) {
+        List<Transaction> transactions = transactionRepository.findBySourceAccount_IdOrTargetAccount_Id(accountId, accountId);
+        return transactions.stream()
+                .map(this::toResponseDTO)
+                .toList();
     }
 
     private boolean isTransactionSuccessful(Account sourceAccount, Account targetAccount, BigDecimal amount) {
@@ -56,5 +60,18 @@ public class TransactionService {
                 targetAccount != null &&
                 sourceAccount != targetAccount &&
                 sourceAccount.getBalance().compareTo(amount) > 0;
+    }
+
+    private TransactionResponseDTO toResponseDTO(Transaction transaction) {
+        TransactionResponseDTO dto = new TransactionResponseDTO();
+        dto.sourceAccount = transaction.getSourceAccount().getId();
+        dto.targetAccount = transaction.getTargetAccount().getId();
+        dto.amount = transaction.getAmount();
+        dto.description = transaction.getDescription();
+        dto.status = transaction.getStatus();
+        dto.sourceIban = transaction.getSourceAccount().getIban();
+        dto.targetIban = transaction.getTargetAccount().getIban();
+        dto.timestamp = transaction.getTimestamp();
+        return dto;
     }
 }
