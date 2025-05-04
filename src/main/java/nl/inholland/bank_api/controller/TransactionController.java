@@ -6,6 +6,7 @@ import nl.inholland.bank_api.model.dto.TransactionResponseDTO;
 import nl.inholland.bank_api.model.entities.Transaction;
 import nl.inholland.bank_api.service.TransactionService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
