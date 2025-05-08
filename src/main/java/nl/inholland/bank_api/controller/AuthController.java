@@ -1,10 +1,7 @@
 package nl.inholland.bank_api.controller;
 
 import jakarta.validation.Valid;
-import nl.inholland.bank_api.model.dto.LoginRequestDTO;
-import nl.inholland.bank_api.model.dto.LoginResponseDTO;
-import nl.inholland.bank_api.model.dto.ResponseIdDTO;
-import nl.inholland.bank_api.model.dto.UserDTO;
+import nl.inholland.bank_api.model.dto.*;
 import nl.inholland.bank_api.model.entities.User;
 import nl.inholland.bank_api.service.UserService;
 import nl.inholland.bank_api.util.JwtUtil;
@@ -29,9 +26,9 @@ public class AuthController {
     }
 
     @PostMapping("register")
-    public ResponseEntity<ResponseIdDTO> register(@Valid @RequestBody UserDTO dto) {
-        Long id = userService.add(dto);
-        return ResponseEntity.status(201).body(new ResponseIdDTO(id));
+    public ResponseEntity<RegisterResponseDTO> register(@Valid @RequestBody RegisterRequestDTO registerRequestDTO) {
+        Long id = userService.createUser(registerRequestDTO);
+        return ResponseEntity.status(201).body(new RegisterResponseDTO(id));
     }
 
     @PostMapping("login")
@@ -43,21 +40,17 @@ public class AuthController {
 
             User user = userService.findByEmail(request.email.trim());
             String token = jwtUtil.generateToken(user.getEmail(), user.getRole().name());
-            UserDTO userDTO = userService.toUserDTO(user);
 
-            return ResponseEntity.ok(new LoginResponseDTO(token, userDTO));
+            return ResponseEntity.ok(new LoginResponseDTO(token));
         } catch (Exception e) {
             return ResponseEntity.status(401).body("Invalid username or password");
         }
     }
 
     @GetMapping("me")
-    public ResponseEntity<?> getCurrentUser(Authentication authentication) {
+    public ResponseEntity<UserProfileDTO> getCurrentUser(Authentication authentication) {
         String email = authentication.getName(); // comes from JWT
-        User user = userService.findByEmail(email);
-
-        UserDTO userDTO = userService.toUserDTO(user);
-
-        return ResponseEntity.ok(userDTO);
+        UserProfileDTO userProfileDTO = userService.getProfileByEmail(email);
+        return ResponseEntity.ok(userProfileDTO);
     }
 }

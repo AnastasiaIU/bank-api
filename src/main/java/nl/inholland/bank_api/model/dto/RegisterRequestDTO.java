@@ -4,7 +4,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
-public class UserDTO {
+public class RegisterRequestDTO {
     @NotBlank(message = "First name is required")
     public String firstName;
 
@@ -25,8 +25,4 @@ public class UserDTO {
     @NotBlank(message = "Phone number is required")
     @Pattern(regexp = "^\\+?[0-9]{10,15}$", message = "Phone number must be 10–15 digits (optionally starts with +)")
     public String phoneNumber;
-
-    public boolean isApproved;
-    public String role;
-    public Long id;
 }
