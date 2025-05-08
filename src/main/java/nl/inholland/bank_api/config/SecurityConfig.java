@@ -37,13 +37,7 @@ public class SecurityConfig {
                 .headers(headers -> headers.frameOptions(frame -> frame.disable())) // To allow H2 frames
                 .authorizeHttpRequests(
                         auth -> auth
-                                .requestMatchers(
-                                        new AntPathRequestMatcher("/auth/register"),
-                                        new AntPathRequestMatcher("/auth/login"),
-                                        new AntPathRequestMatcher("/swagger-ui/**"),
-                                        new AntPathRequestMatcher("/v3/api-docs/**"),
-                                        new AntPathRequestMatcher("/h2-console/**")
-                                ).permitAll() // Public endpoints
+                                .requestMatchers(SecurityConstants.PUBLIC_ENDPOINTS).permitAll()
                                 .anyRequest().authenticated() // All other endpoints require auth
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
