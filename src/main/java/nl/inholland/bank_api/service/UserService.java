@@ -8,6 +8,8 @@ import nl.inholland.bank_api.util.StringUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class UserService {
     private final UserRepository userRepository;
@@ -59,5 +61,4 @@ public class UserService {
     public User findByEmail(String email) {
         return userRepository.findByEmail(email.trim());
     }
-
 }

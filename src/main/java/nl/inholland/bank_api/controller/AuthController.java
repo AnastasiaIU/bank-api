@@ -42,10 +42,8 @@ public class AuthController {
             );
 
             User user = userService.findByEmail(request.email.trim());
-            String token = jwtUtil.generateToken(user.getEmail(), user.getRole().name());
-            UserDTO userDTO = userService.toUserDTO(user);
-
-            return ResponseEntity.ok(new LoginResponseDTO(token, userDTO));
+            String token = jwtUtil.generateToken(user.getEmail());
+            return ResponseEntity.ok(new LoginResponseDTO(token));
         } catch (Exception e) {
             return ResponseEntity.status(401).body("Invalid username or password");
         }
