@@ -32,19 +32,15 @@ public class AuthController {
     }
 
     @PostMapping("login")
-    public ResponseEntity<?> login(@Valid @RequestBody LoginRequestDTO request) {
-        try {
-            authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(request.email, request.password)
-            );
+    public ResponseEntity<LoginResponseDTO> login(@Valid @RequestBody LoginRequestDTO request) {
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(request.email, request.password)
+        );
 
-            User user = userService.findByEmail(request.email.trim());
-            String token = jwtUtil.generateToken(user.getEmail(), user.getRole().name());
+        User user = userService.findByEmail(request.email);
+        String token = jwtUtil.generateToken(user.getEmail());
 
-            return ResponseEntity.ok(new LoginResponseDTO(token));
-        } catch (Exception e) {
-            return ResponseEntity.status(401).body("Invalid username or password");
-        }
+        return ResponseEntity.ok(new LoginResponseDTO(token));
     }
 
     @GetMapping("me")

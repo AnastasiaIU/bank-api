@@ -8,6 +8,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -100,5 +101,11 @@ public class GlobalExceptionHandler {
                         e.getClass().getSimpleName(),
                         violations
                 ));
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ExceptionDTO> handleBadCredentials(BadCredentialsException e) {
+        log.severe(e.getMessage());
+        return buildError(HttpStatus.UNAUTHORIZED, e, "Invalid email or password");
     }
 }

@@ -1,5 +1,6 @@
 package nl.inholland.bank_api.util;
 
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -31,39 +32,35 @@ public class JwtFilter extends OncePerRequestFilter{
                                     HttpServletResponse response,
                                     FilterChain chain)
             throws ServletException, IOException {
-
+    try{
         final String authHeader = request.getHeader("Authorization");
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("Missing or invalid Authorization header");
-            return;
+            throw new JwtException("Missing or invalid Authorization header");
         }
 
         String jwt = authHeader.substring(7);
-        String email;
 
-            if (jwtUtil.isTokenValid(jwt)) {
-                email = jwtUtil.extractEmail(jwt);
-                var userDetails = userDetailsService.loadUserByUsername(email);
+            jwtUtil.validateToken(jwt);
 
-                var authToken = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities()
-                );
+            String email = jwtUtil.extractEmail(jwt);
+            var userDetails = userDetailsService.loadUserByUsername(email);
 
-                authToken.setDetails(
-                        new WebAuthenticationDetailsSource().buildDetails(request)
-                );
+            var authToken = new UsernamePasswordAuthenticationToken(
+                    userDetails, null, userDetails.getAuthorities()
+            );
 
-                SecurityContextHolder.getContext().setAuthentication(authToken);
-            }
-            else {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.getWriter().write("Invalid or expired token");
-                return;
-            }
+            authToken.setDetails(
+                    new WebAuthenticationDetailsSource().buildDetails(request)
+            );
 
-        chain.doFilter(request, response);
+            SecurityContextHolder.getContext().setAuthentication(authToken);
+
+            chain.doFilter(request, response);
+        }
+        catch (JwtException e) {
+            jwtUtil.sendJwtErrorResponse(response, e);
+        }
     }
 
     @Override
