@@ -6,9 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import nl.inholland.bank_api.model.enums.UserRole;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.GrantedAuthority;
-import java.util.Collection;
 import java.util.List;
 
 @Data
@@ -17,7 +14,7 @@ import java.util.List;
 @Builder
 @Entity
 @Table(name = "app_user")
-public class User implements UserDetails {
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -49,19 +46,4 @@ public class User implements UserDetails {
 
     @OneToMany(mappedBy = "user")
     private List<Account> accounts;
-
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(() -> "ROLE_" + role.name());
-    }
-
-    @Override
-    public String getUsername() {
-        return this.email; // using email as the username
-    }
-
-    @Override
-    public String getPassword() {
-        return this.password;
-    }
 }

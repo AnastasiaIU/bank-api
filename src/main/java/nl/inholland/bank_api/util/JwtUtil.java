@@ -1,54 +1,56 @@
 package nl.inholland.bank_api.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletResponse;
 import nl.inholland.bank_api.model.dto.ExceptionDTO;
-import org.springframework.beans.factory.annotation.Value;
+import nl.inholland.bank_api.model.enums.UserRole;
+import nl.inholland.bank_api.service.CustomUserDetailsService;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
-
-import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.security.Key;
+import java.security.PublicKey;
 import java.util.Date;
-import java.util.Base64;
 import java.util.List;
 
 @Component
 public class JwtUtil {
 
-    @Value("${jwt.secret}")
-    private String secret;
+    private final JwtKeyProvider keyProvider;
+    private final CustomUserDetailsService userDetailsService;
 
-    private Key secretKey;
-    private final long expirationMillis = 1000 * 60 * 60; // 1 hour
-
-    @PostConstruct
-    public void init() {
-        byte[] keyBytes = Base64.getDecoder().decode(secret);
-        this.secretKey = Keys.hmacShaKeyFor(keyBytes);
+    public JwtUtil(JwtKeyProvider keyProvider, CustomUserDetailsService userDetailsService) {
+        this.keyProvider = keyProvider;
+        this.userDetailsService = userDetailsService;
     }
 
-    public String generateToken(String email) {
+    public String generateToken(String email, UserRole role) {
+        Date now = new Date();
+        Date expiration = new Date(now.getTime() + 3600000);
+        Key privateKey = keyProvider.getPrivateKey();
         return Jwts.builder()
                 .setSubject(email)
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + expirationMillis))
-                .signWith(secretKey, SignatureAlgorithm.HS256)
+                .claim("auth", role.name())
+                .setIssuedAt(now)
+                .setExpiration(expiration)
+                .signWith(privateKey)
                 .compact();
     }
 
-    public String extractEmail(String token) {
-        return Jwts.parserBuilder().setSigningKey(secretKey).build()
-                .parseClaimsJws(token).getBody().getSubject();
-    }
-
-    public void validateToken(String token) {
-            Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token);
+    public Authentication validateToken(String token) {
+        PublicKey publicKey = keyProvider.getPublicKey();
+            Claims claims =
+                    Jwts.parserBuilder().setSigningKey(publicKey).build().parseClaimsJws(token).getBody();
+            String username = claims.getSubject();
+            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+            return new UsernamePasswordAuthenticationToken(userDetails, "",
+                    userDetails.getAuthorities());
     }
 
     public void sendJwtErrorResponse(HttpServletResponse response, JwtException e) throws IOException {
