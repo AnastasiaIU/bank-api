@@ -6,25 +6,19 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import nl.inholland.bank_api.config.SecurityConstants;
-import nl.inholland.bank_api.service.CustomUserDetailsService;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
-
 import java.io.IOException;
 
 @Component
 public class JwtFilter extends OncePerRequestFilter{
     private final JwtUtil jwtUtil;
-    private final CustomUserDetailsService userDetailsService;
-    private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
-    public JwtFilter(JwtUtil jwtUtil, CustomUserDetailsService userDetailsService) {
+    public JwtFilter(JwtUtil jwtUtil) {
         this.jwtUtil = jwtUtil;
-        this.userDetailsService = userDetailsService;
     }
 
     @Override
@@ -33,39 +27,42 @@ public class JwtFilter extends OncePerRequestFilter{
                                     FilterChain chain)
             throws ServletException, IOException {
     try{
-        final String authHeader = request.getHeader("Authorization");
+        String token = getToken(request);
+        String path = request.getRequestURI();
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            throw new JwtException("Missing or invalid Authorization header");
+        if (isPublicEndpoint(path)) {
+            // Public endpoints continue without token
+            chain.doFilter(request, response);
+            return;
         }
 
-        String jwt = authHeader.substring(7);
+        if (token == null) {
+            // Protected endpoint but token is missing
+            throw new JwtException("Missing token or Authorization header");
+        }
 
-            jwtUtil.validateToken(jwt);
+        Authentication authentication = jwtUtil.validateToken(token);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            String email = jwtUtil.extractEmail(jwt);
-            var userDetails = userDetailsService.loadUserByUsername(email);
-
-            var authToken = new UsernamePasswordAuthenticationToken(
-                    userDetails, null, userDetails.getAuthorities()
-            );
-
-            authToken.setDetails(
-                    new WebAuthenticationDetailsSource().buildDetails(request)
-            );
-
-            SecurityContextHolder.getContext().setAuthentication(authToken);
-
-            chain.doFilter(request, response);
+        chain.doFilter(request, response);
         }
         catch (JwtException e) {
             jwtUtil.sendJwtErrorResponse(response, e);
+            return;
         }
     }
 
-    @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-        String path = request.getRequestURI();
+    private String getToken(HttpServletRequest request) {
+        String bearerToken = request.getHeader("Authorization");
+        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+            return bearerToken.substring(7);
+        }
+
+        return null;
+    }
+
+    private boolean isPublicEndpoint(String path) {
+        AntPathMatcher pathMatcher = new AntPathMatcher();
         for (String pattern : SecurityConstants.PUBLIC_ENDPOINTS) {
             if (pathMatcher.match(pattern, path)) {
                 return true;

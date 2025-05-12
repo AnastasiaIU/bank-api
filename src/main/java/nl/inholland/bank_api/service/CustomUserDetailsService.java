@@ -6,6 +6,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class CustomUserDetailsService implements UserDetailsService{
     private final UserRepository userRepository;
@@ -24,7 +26,7 @@ public class CustomUserDetailsService implements UserDetailsService{
         return new org.springframework.security.core.userdetails.User(
                 user.getEmail(),
                 user.getPassword(),
-                user.getAuthorities()
+                List.of(user.getRole())
         );
     }
 }
