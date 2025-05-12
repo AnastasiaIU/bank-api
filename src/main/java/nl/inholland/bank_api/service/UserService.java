@@ -52,7 +52,7 @@ public class UserService {
             throw new BadCredentialsException("Invalid email or password");
         }
 
-        String token = jwtUtil.generateToken(user.getEmail(), user.getRole());
+        String token = jwtUtil.generateToken(user.getEmail(), user.getRole(), user.getId());
         return new LoginResponseDTO(token);
     }
 

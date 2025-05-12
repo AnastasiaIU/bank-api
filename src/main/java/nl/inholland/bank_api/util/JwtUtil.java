@@ -29,13 +29,14 @@ public class JwtUtil {
         this.userDetailsService = userDetailsService;
     }
 
-    public String generateToken(String email, UserRole role) {
+    public String generateToken(String email, UserRole role, Long userId) {
         Date now = new Date();
         Date expiration = new Date(now.getTime() + 3600000);
         Key privateKey = keyProvider.getPrivateKey();
         return Jwts.builder()
                 .setSubject(email)
                 .claim("auth", role.name())
+                .claim("userId", userId)
                 .setIssuedAt(now)
                 .setExpiration(expiration)
                 .signWith(privateKey)
