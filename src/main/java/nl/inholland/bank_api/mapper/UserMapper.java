@@ -25,6 +25,7 @@ public class UserMapper {
 
     public UserProfileDTO toProfileDTO(User user) {
         return new UserProfileDTO(
+                user.getId(),
                 user.getFirstName(),
                 user.getLastName(),
                 user.getEmail(),

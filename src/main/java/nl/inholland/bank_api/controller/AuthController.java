@@ -2,27 +2,18 @@ package nl.inholland.bank_api.controller;
 
 import jakarta.validation.Valid;
 import nl.inholland.bank_api.model.dto.*;
-import nl.inholland.bank_api.model.entities.User;
 import nl.inholland.bank_api.service.UserService;
-import nl.inholland.bank_api.util.JwtUtil;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 
 @RestController
 @RequestMapping("auth")
 public class AuthController {
-    private final AuthenticationManager authenticationManager;
-    private final JwtUtil jwtUtil;
     private final UserService userService;
 
-    public AuthController(UserService userService, AuthenticationManager authenticationManager,
-                          JwtUtil jwtUtil) {
+    public AuthController(UserService userService) {
         this.userService = userService;
-        this.authenticationManager = authenticationManager;
-        this.jwtUtil = jwtUtil;
     }
 
     @PostMapping("register")
