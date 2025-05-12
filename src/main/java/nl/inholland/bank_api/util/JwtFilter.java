@@ -16,7 +16,6 @@ import java.io.IOException;
 @Component
 public class JwtFilter extends OncePerRequestFilter{
     private final JwtUtil jwtUtil;
-    private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
     public JwtFilter(JwtUtil jwtUtil) {
         this.jwtUtil = jwtUtil;
@@ -29,11 +28,17 @@ public class JwtFilter extends OncePerRequestFilter{
             throws ServletException, IOException {
     try{
         String token = getToken(request);
+        String path = request.getRequestURI();
 
-        // will automatically return a 403 if the accessed URL required authorization
-        if (token == null) {
+        if (isPublicEndpoint(path)) {
+            // Public endpoints continue without token
             chain.doFilter(request, response);
             return;
+        }
+
+        if (token == null) {
+            // Protected endpoint but token is missing
+            throw new JwtException("Missing token or Authorization header");
         }
 
         Authentication authentication = jwtUtil.validateToken(token);
@@ -47,17 +52,6 @@ public class JwtFilter extends OncePerRequestFilter{
         }
     }
 
-    @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-        String path = request.getRequestURI();
-        for (String pattern : SecurityConstants.PUBLIC_ENDPOINTS) {
-            if (pathMatcher.match(pattern, path)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     private String getToken(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
         if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
@@ -65,5 +59,15 @@ public class JwtFilter extends OncePerRequestFilter{
         }
 
         return null;
+    }
+
+    private boolean isPublicEndpoint(String path) {
+        AntPathMatcher pathMatcher = new AntPathMatcher();
+        for (String pattern : SecurityConstants.PUBLIC_ENDPOINTS) {
+            if (pathMatcher.match(pattern, path)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

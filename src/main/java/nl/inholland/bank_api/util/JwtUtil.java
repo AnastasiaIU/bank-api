@@ -21,7 +21,6 @@ import java.util.List;
 
 @Component
 public class JwtUtil {
-
     private final JwtKeyProvider keyProvider;
     private final CustomUserDetailsService userDetailsService;
 
@@ -45,12 +44,21 @@ public class JwtUtil {
 
     public Authentication validateToken(String token) {
         PublicKey publicKey = keyProvider.getPublicKey();
-            Claims claims =
-                    Jwts.parserBuilder().setSigningKey(publicKey).build().parseClaimsJws(token).getBody();
+        try {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(publicKey)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+
             String username = claims.getSubject();
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-            return new UsernamePasswordAuthenticationToken(userDetails, "",
-                    userDetails.getAuthorities());
+            return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+
+        } catch (io.jsonwebtoken.JwtException e) {
+            // Rethrow to preserve the specific exception type
+            throw e;
+        }
     }
 
     public void sendJwtErrorResponse(HttpServletResponse response, JwtException e) throws IOException {
@@ -72,5 +80,4 @@ public class JwtUtil {
         response.setContentType("application/json");
         new ObjectMapper().writeValue(response.getWriter(), dto);
     }
-
 }

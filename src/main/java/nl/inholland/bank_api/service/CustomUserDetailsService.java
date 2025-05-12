@@ -2,7 +2,6 @@ package nl.inholland.bank_api.service;
 
 import nl.inholland.bank_api.repository.UserRepository;
 import nl.inholland.bank_api.model.entities.User;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
@@ -11,9 +10,7 @@ import java.util.List;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService{
-
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
     public CustomUserDetailsService(UserRepository userRepository) {
         this.userRepository = userRepository;
