@@ -62,6 +62,10 @@ public class UserService {
     }
 
     public Long getUserIdFromToken(String token) {
+        // Remove "Bearer " prefix if present
+        if (token.startsWith("Bearer ")) {
+            token = token.substring(7);
+        }
         return jwtUtil.extractUserId(token);
     }
 }

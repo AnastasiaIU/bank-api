@@ -74,8 +74,7 @@ public class JwtUtil {
         ExceptionDTO dto = new ExceptionDTO(
                 HttpStatus.UNAUTHORIZED.value(),
                 e.getClass().getSimpleName(),
-                List.of(message)
-        );
+                List.of(message));
 
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
         response.setContentType("application/json");
@@ -85,15 +84,21 @@ public class JwtUtil {
     public <T> T extractClaim(String token, String claimName, Class<T> claimType) {
         PublicKey publicKey = keyProvider.getPublicKey();
         Claims claims = Jwts.parserBuilder()
-            .setSigningKey(publicKey)
-            .build()
-            .parseClaimsJws(token)
-            .getBody();
+                .setSigningKey(publicKey)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
 
         return claims.get(claimName, claimType);
     }
 
     public Long extractUserId(String token) {
-        return extractClaim(token, "userId", Long.class);
+        Object userIdClaim = extractClaim(token, "userId", Object.class);
+
+        if (userIdClaim instanceof Number) {
+            return ((Number) userIdClaim).longValue();
+        }
+
+        return Long.valueOf(userIdClaim.toString());
     }
 }
