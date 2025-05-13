@@ -81,4 +81,19 @@ public class JwtUtil {
         response.setContentType("application/json");
         new ObjectMapper().writeValue(response.getWriter(), dto);
     }
+
+    public <T> T extractClaim(String token, String claimName, Class<T> claimType) {
+        PublicKey publicKey = keyProvider.getPublicKey();
+        Claims claims = Jwts.parserBuilder()
+            .setSigningKey(publicKey)
+            .build()
+            .parseClaimsJws(token)
+            .getBody();
+
+        return claims.get(claimName, claimType);
+    }
+
+    public Long extractUserId(String token) {
+        return extractClaim(token, "userId", Long.class);
+    }
 }

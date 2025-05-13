@@ -60,4 +60,8 @@ public class UserService {
         User user = userRepository.findByEmail(email.trim());
         return userMapper.toProfileDTO(user);
     }
+
+    public Long getUserIdFromToken(String token) {
+        return jwtUtil.extractUserId(token);
+    }
 }
