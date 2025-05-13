@@ -1,20 +1,24 @@
 package nl.inholland.bank_api.controller;
 
 import nl.inholland.bank_api.model.dto.AccountDTO;
+import nl.inholland.bank_api.model.entities.User;
 import nl.inholland.bank_api.service.AccountService;
+import nl.inholland.bank_api.service.UserService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
-
 import java.util.List;
 
 @RestController
 public class AccountController {
     private final AccountService accountService;
+    private final UserService userService;
 
-    public AccountController(AccountService accountService) {
+    public AccountController(AccountService accountService, UserService userService) {
         this.accountService = accountService;
+        this.userService = userService;
     }
 
     @GetMapping("/accounts/{iban}")
@@ -26,6 +30,15 @@ public class AccountController {
     @GetMapping("/users/{userId}/accounts")
     public ResponseEntity<List<AccountDTO>> fetchAccountsByUserId(@PathVariable Long userId) {
         List<AccountDTO> accounts =  accountService.fetchAccountsByUserId(userId);
+        return ResponseEntity.ok(accounts);
+    }
+
+    @GetMapping("/users/accounts")
+    public ResponseEntity<List<AccountDTO>> fetchAccountsByAccountId(Authentication authentication) {
+        String email = authentication.getName();
+        User user = userService.findByEmail(email);
+
+        List<AccountDTO> accounts =  accountService.fetchAccountsByUserId(user.getId());
         return ResponseEntity.ok(accounts);
     }
 }
