@@ -7,6 +7,7 @@ import nl.inholland.bank_api.service.TransactionService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 
@@ -26,8 +27,16 @@ public class TransactionController {
     }
 
     @GetMapping("/accounts/{accountId}/transactions")
-    public ResponseEntity<List<TransactionResponseDTO>> getTransactionsByAccount(@PathVariable Long accountId) {
-        List<TransactionResponseDTO> transactions = transactionService.getTransactionsForAccount(accountId);
+    public ResponseEntity<List<TransactionResponseDTO>> getTransactionsByAccount(@PathVariable Long accountId, @RequestParam(required = false) String onDate,
+                                                                                 @RequestParam(required = false) String before,
+                                                                                 @RequestParam(required = false) String after,
+                                                                                 @RequestParam(required = false) BigDecimal amount,
+                                                                                 @RequestParam(required = false) String comparison,
+                                                                                 @RequestParam(required = false) String sourceIban,
+                                                                                 @RequestParam(required = false) String targetIban) {
+        List<TransactionResponseDTO> transactions = transactionService.getFilteredTransactions(
+                accountId, onDate, before, after, amount, comparison, sourceIban, targetIban
+        );
         return ResponseEntity.ok(transactions);
     }
 }
