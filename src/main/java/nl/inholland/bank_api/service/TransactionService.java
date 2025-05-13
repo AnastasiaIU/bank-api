@@ -130,9 +130,22 @@ public class TransactionService {
     }
 
     private boolean isTransactionSuccessful(Account sourceAccount, Account targetAccount, BigDecimal amount) {
-        return sourceAccount != null &&
-                targetAccount != null &&
-                sourceAccount != targetAccount &&
-                sourceAccount.getBalance().compareTo(amount) > 0;
+        if (sourceAccount == null || targetAccount == null || sourceAccount == targetAccount) {
+            return false;
+        }
+
+        // Check absolute limit
+        BigDecimal resultingBalance = sourceAccount.getBalance().subtract(amount);
+        if (resultingBalance.compareTo(sourceAccount.getAbsoluteLimit()) < 0) {
+            return false; // would go below absolute limit
+        }
+
+        // Check daily limit
+        BigDecimal totalToday = transactionRepository.sumAmountForAccountToday(sourceAccount.getId(), LocalDate.now());
+        if (totalToday.add(amount).compareTo(sourceAccount.getDailyLimit()) > 0) {
+            return false; // daily limit exceeded
+        }
+
+        return true;
     }
 }
