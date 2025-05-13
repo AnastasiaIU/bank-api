@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -57,9 +58,40 @@ public class TransactionService {
         return transaction;
     }
 
-    public List<TransactionResponseDTO> getTransactionsForAccount(Long accountId) {
+    public List<TransactionResponseDTO> getFilteredTransactions(Long accountId, String onDate, String before, String after, BigDecimal amount, String comparison, String sourceIban, String targetIban) {
         List<Transaction> transactions = transactionRepository.findBySourceAccount_IdOrTargetAccount_Id(accountId, accountId);
+
         return transactions.stream()
+                .filter(t -> {
+                    LocalDateTime ts = t.getTimestamp();
+
+                    if (onDate != null) {
+                        LocalDate date = LocalDate.parse(onDate);
+                        if (!ts.toLocalDate().isEqual(date))
+                            return false;
+                    }
+
+                    if (before != null && ts.isAfter(LocalDateTime.parse(before)))
+                        return false;
+
+                    if (after != null && ts.isBefore(LocalDateTime.parse(after)))
+                        return false;
+
+                    if (amount != null) {
+                        int cmp = t.getAmount().compareTo(amount);
+                        return switch (comparison) {
+                            case "lt" -> cmp < 0;
+                            case "gt" -> cmp > 0;
+                            case "eq" -> cmp == 0;
+                            default -> true;
+                        };
+                    }
+                    if (sourceIban != null && !t.getSourceAccount().getIban().equals(sourceIban))
+                        return false;
+                    if (targetIban != null && !t.getTargetAccount().getIban().equals(targetIban))
+                        return false;
+                    return true;
+                })
                 .map(this::toResponseDTO)
                 .toList();
     }
