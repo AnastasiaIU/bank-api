@@ -7,9 +7,7 @@ import nl.inholland.bank_api.model.dto.TransactionFilterDTO;
 import nl.inholland.bank_api.model.dto.TransactionRequestDTO;
 import nl.inholland.bank_api.model.dto.TransactionResponseDTO;
 import nl.inholland.bank_api.model.entities.Account;
-import nl.inholland.bank_api.model.entities.AtmTransaction;
 import nl.inholland.bank_api.model.entities.Transaction;
-import nl.inholland.bank_api.model.enums.AtmTransactionType;
 import nl.inholland.bank_api.model.enums.Operation;
 import nl.inholland.bank_api.model.enums.Status;
 import nl.inholland.bank_api.repository.AtmTransactionRepository;
@@ -19,12 +17,9 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static java.util.Arrays.stream;
 
 @Service
 public class TransactionService {
