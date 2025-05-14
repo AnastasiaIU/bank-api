@@ -41,5 +41,5 @@ public class Account {
     private BigDecimal withdrawLimit;
 
     @Column(nullable = false)
-    private BigDecimal transferLimit;
+    private BigDecimal dailyLimit;
 }

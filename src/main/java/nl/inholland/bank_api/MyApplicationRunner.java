@@ -69,7 +69,7 @@ public class MyApplicationRunner implements ApplicationRunner {
                 .balance(BigDecimal.valueOf(10000.00))
                 .absoluteLimit(BigDecimal.valueOf(-300.00))
                 .withdrawLimit(BigDecimal.valueOf(3000.00))
-                .transferLimit(BigDecimal.valueOf(5000.00))
+                .dailyLimit(BigDecimal.valueOf(5000.00))
                 .build();
 
         Account savings = Account.builder()
@@ -79,7 +79,7 @@ public class MyApplicationRunner implements ApplicationRunner {
                 .balance(BigDecimal.valueOf(50000.00))
                 .absoluteLimit(BigDecimal.valueOf(-100.00))
                 .withdrawLimit(BigDecimal.valueOf(1000.00))
-                .transferLimit(BigDecimal.valueOf(5000.00))
+                .dailyLimit(BigDecimal.valueOf(5000.00))
                 .build();
 
 

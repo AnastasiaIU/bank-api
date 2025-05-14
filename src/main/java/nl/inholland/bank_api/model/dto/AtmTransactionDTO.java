@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 public record AtmTransactionDTO(
         Long id,
         String iban,
+        Long initiatedBy,
         AtmTransactionType type,
         BigDecimal amount,
         LocalDateTime timestamp,
