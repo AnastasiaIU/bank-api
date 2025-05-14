@@ -15,7 +15,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -68,6 +67,9 @@ public class MyApplicationRunner implements ApplicationRunner {
                 .iban("NL91ABNA0417164300")
                 .type(AccountType.CHECKING)
                 .balance(BigDecimal.valueOf(10000.00))
+                .absoluteLimit(BigDecimal.valueOf(-300.00))
+                .withdrawLimit(BigDecimal.valueOf(3000.00))
+                .transferLimit(BigDecimal.valueOf(5000.00))
                 .build();
 
         Account savings = Account.builder()
@@ -75,6 +77,9 @@ public class MyApplicationRunner implements ApplicationRunner {
                 .iban("NL91ABNA0417164301")
                 .type(AccountType.SAVINGS)
                 .balance(BigDecimal.valueOf(50000.00))
+                .absoluteLimit(BigDecimal.valueOf(-100.00))
+                .withdrawLimit(BigDecimal.valueOf(1000.00))
+                .transferLimit(BigDecimal.valueOf(5000.00))
                 .build();
 
 
