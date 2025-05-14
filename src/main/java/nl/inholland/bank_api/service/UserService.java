@@ -10,6 +10,7 @@ import nl.inholland.bank_api.repository.UserRepository;
 import nl.inholland.bank_api.util.JwtUtil;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -42,11 +43,8 @@ public class UserService {
     }
 
     public LoginResponseDTO login(LoginRequestDTO loginRequest) {
-        User user = userRepository.findByEmail(loginRequest.email.trim());
-
-        if (user == null) {
-            throw new InternalAuthenticationServiceException("Invalid email or password");
-        }
+        User user = userRepository.findByEmail(loginRequest.email.trim())
+                .orElseThrow(() -> new BadCredentialsException("Invalid email or password"));
 
         if (!passwordEncoder.matches(loginRequest.password, user.getPassword())) {
             throw new BadCredentialsException("Invalid email or password");
@@ -57,7 +55,8 @@ public class UserService {
     }
 
     public UserProfileDTO getProfileByEmail(String email) {
-        User user = userRepository.findByEmail(email.trim());
-        return userMapper.toProfileDTO(user);
+        return userRepository.findByEmail(email.trim())
+                .map(userMapper::toProfileDTO)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
     }
 }

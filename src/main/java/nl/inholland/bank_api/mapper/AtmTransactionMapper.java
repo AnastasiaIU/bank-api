@@ -1,0 +1,32 @@
+package nl.inholland.bank_api.mapper;
+
+import nl.inholland.bank_api.model.dto.AtmTransactionDTO;
+import nl.inholland.bank_api.model.dto.AtmTransactionRequestDTO;
+import nl.inholland.bank_api.model.entities.Account;
+import nl.inholland.bank_api.model.entities.AtmTransaction;
+import nl.inholland.bank_api.model.enums.Status;
+import org.springframework.stereotype.Component;
+
+@Component
+public class AtmTransactionMapper {
+    public AtmTransaction toEntity(AtmTransactionRequestDTO dto, Account account) {
+        return AtmTransaction.builder()
+                .account(account)
+                .type(dto.type)
+                .amount(dto.amount)
+                .status(Status.PENDING)
+                .build();
+    }
+
+    public AtmTransactionDTO toAtmTransactionDTO(AtmTransaction entity) {
+        return new AtmTransactionDTO(
+                entity.getId(),
+                entity.getAccount().getIban(),
+                entity.getType(),
+                entity.getAmount(),
+                entity.getTimestamp(),
+                entity.getStatus().name(),
+                entity.getFailureReason()
+        );
+    }
+}

@@ -33,4 +33,13 @@ public class Account {
 
     @Column(nullable = false, columnDefinition = "DECIMAL(15,2) DEFAULT 0.00")
     private BigDecimal balance;
+
+    @Column(nullable = false)
+    private BigDecimal absoluteLimit;
+
+    @Column(nullable = false)
+    private BigDecimal withdrawLimit;
+
+    @Column(nullable = false)
+    private BigDecimal transferLimit;
 }

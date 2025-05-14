@@ -11,16 +11,16 @@ import org.springframework.stereotype.Component;
 @Component
 public class UserMapper {
     public User toEntity(RegisterRequestDTO dto, PasswordEncoder encoder) {
-        User user = new User();
-        user.setFirstName(StringUtils.capitalize(dto.firstName.trim()));
-        user.setLastName(StringUtils.capitalize(dto.lastName.trim()));
-        user.setEmail(dto.email.trim());
-        user.setPassword(encoder.encode(dto.password.trim()));
-        user.setBsn(dto.bsn.trim());
-        user.setPhoneNumber(dto.phoneNumber.trim());
-        user.setApproved(false);
-        user.setRole(UserRole.CUSTOMER);
-        return user;
+        return User.builder()
+                .firstName(StringUtils.capitalize(dto.firstName.trim()))
+                .lastName(StringUtils.capitalize(dto.lastName.trim()))
+                .email(dto.email.trim())
+                .password(encoder.encode(dto.password.trim()))
+                .bsn(dto.bsn.trim())
+                .phoneNumber(dto.phoneNumber.trim())
+                .isApproved(false)
+                .role(UserRole.CUSTOMER)
+                .build();
     }
 
     public UserProfileDTO toProfileDTO(User user) {
