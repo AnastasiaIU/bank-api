@@ -4,14 +4,17 @@ import nl.inholland.bank_api.model.dto.AtmTransactionDTO;
 import nl.inholland.bank_api.model.dto.AtmTransactionRequestDTO;
 import nl.inholland.bank_api.model.entities.Account;
 import nl.inholland.bank_api.model.entities.AtmTransaction;
+import nl.inholland.bank_api.model.entities.User;
 import nl.inholland.bank_api.model.enums.Status;
 import org.springframework.stereotype.Component;
 
 @Component
 public class AtmTransactionMapper {
-    public AtmTransaction toEntity(AtmTransactionRequestDTO dto, Account account) {
+    public AtmTransaction toEntity(AtmTransactionRequestDTO dto, Account account, User initiatedBy) {
+
         return AtmTransaction.builder()
                 .account(account)
+                .initiatedBy(initiatedBy)
                 .type(dto.type)
                 .amount(dto.amount)
                 .status(Status.PENDING)
@@ -22,6 +25,7 @@ public class AtmTransactionMapper {
         return new AtmTransactionDTO(
                 entity.getId(),
                 entity.getAccount().getIban(),
+                entity.getInitiatedBy().getId(),
                 entity.getType(),
                 entity.getAmount(),
                 entity.getTimestamp(),

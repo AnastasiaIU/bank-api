@@ -17,9 +17,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 
 @RestControllerAdvice
@@ -121,22 +119,14 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(UsernameNotFoundException.class)
-    public ResponseEntity<Object> handleUsernameNotFoundException(UsernameNotFoundException e) {
-        Map<String, String> body = new HashMap<>();
-        body.put("error", e.getMessage());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
+    public ResponseEntity<ExceptionDTO> handleUsernameNotFoundException(UsernameNotFoundException e) {
+        log.severe(e.getMessage());
+        return buildError(HttpStatus.NOT_FOUND, e, e.getMessage());
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<String> handleHttpMessageNotReadable(HttpMessageNotReadableException e) {
-        String message = "Malformed JSON request: " + extractCause(e);
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(message);
-    }
-
-    private String extractCause(Throwable e) {
-        if (e.getCause() != null) {
-            return e.getCause().getMessage();
-        }
-        return e.getMessage();
+    public ResponseEntity<ExceptionDTO> handleHttpMessageNotReadable(HttpMessageNotReadableException e) {
+        log.severe(e.getMessage());
+        return buildError(HttpStatus.BAD_REQUEST, e, e.getMessage());
     }
 }

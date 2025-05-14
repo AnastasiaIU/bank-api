@@ -27,6 +27,10 @@ public class AtmTransaction {
     @JoinColumn(name = "account_id", nullable = false)
     private Account account;
 
+    @ManyToOne
+    @JoinColumn(name = "initiated_by", nullable = false)
+    private User initiatedBy;
+
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private AtmTransactionType type;

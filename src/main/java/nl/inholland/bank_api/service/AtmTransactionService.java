@@ -1,11 +1,11 @@
 package nl.inholland.bank_api.service;
 
-import jakarta.persistence.EntityNotFoundException;
 import nl.inholland.bank_api.mapper.AtmTransactionMapper;
 import nl.inholland.bank_api.model.dto.AtmTransactionDTO;
 import nl.inholland.bank_api.model.dto.AtmTransactionRequestDTO;
 import nl.inholland.bank_api.model.entities.Account;
 import nl.inholland.bank_api.model.entities.AtmTransaction;
+import nl.inholland.bank_api.model.entities.User;
 import nl.inholland.bank_api.model.enums.AtmTransactionType;
 import nl.inholland.bank_api.model.enums.Status;
 import nl.inholland.bank_api.repository.AccountRepository;
@@ -33,11 +33,8 @@ public class AtmTransactionService {
         this.transactionMapper = atmTransactionMapper;
     }
 
-    public AtmTransactionDTO createTransaction(AtmTransactionRequestDTO dto) {
-        Account account = accountRepository.findByIban(dto.iban.trim())
-                .orElseThrow(() -> new EntityNotFoundException("Account not found for IBAN: " + dto.iban));
-
-        AtmTransaction transaction = transactionMapper.toEntity(dto, account);
+    public AtmTransactionDTO createTransaction(AtmTransactionRequestDTO dto, Account account, User initiatedBy) {
+        AtmTransaction transaction = transactionMapper.toEntity(dto, account, initiatedBy);
         AtmTransaction saved = transactionRepository.save(transaction);
 
         return transactionMapper.toAtmTransactionDTO(saved);
