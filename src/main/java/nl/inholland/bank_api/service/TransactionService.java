@@ -38,7 +38,7 @@ public class TransactionService {
         transaction.setDescription(dto.description);
 
         if (isTransactionSuccessful(sourceAccount, targetAccount, dto.amount)) {
-            transaction.setStatus(Status.SUCCEED);
+            transaction.setStatus(Status.SUCCEEDED);
             accountService.updateBalance(sourceAccount, dto.amount, Operation.SUBTRACTION);
             accountService.updateBalance(targetAccount, dto.amount, Operation.ADDITION);
         } else {
