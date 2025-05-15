@@ -2,9 +2,12 @@ package nl.inholland.bank_api.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import nl.inholland.bank_api.model.dto.AccountDTO;
+import nl.inholland.bank_api.model.dto.AccountWithUserDTO;
 import nl.inholland.bank_api.model.entities.Account;
 import nl.inholland.bank_api.model.enums.Operation;
 import nl.inholland.bank_api.repository.AccountRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -56,5 +59,24 @@ public class AccountService {
         }
 
         return dto;
+    }
+
+    private AccountWithUserDTO toAccountWithUserDTO(Account account) {
+        AccountWithUserDTO dto = new AccountWithUserDTO();
+        dto.setIban(account.getIban());
+        dto.setType(account.getType().name());
+        dto.setBalance(account.getBalance());
+
+        if (account.getUser() != null) {
+            dto.setFirstName(account.getUser().getFirstName());
+            dto.setLastName(account.getUser().getLastName());
+        }
+
+        return dto;
+    }
+
+    public Page<AccountWithUserDTO> fetchAllAccounts(Pageable pageable) {
+        Page<Account> accounts = accountRepository.findAll(pageable);
+        return accounts.map(this::toAccountWithUserDTO);
     }
 }
