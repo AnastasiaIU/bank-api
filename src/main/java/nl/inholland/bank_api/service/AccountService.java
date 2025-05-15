@@ -1,6 +1,7 @@
 package nl.inholland.bank_api.service;
 
 import jakarta.persistence.EntityNotFoundException;
+import nl.inholland.bank_api.mapper.AccountMapper;
 import nl.inholland.bank_api.model.dto.AccountDTO;
 import nl.inholland.bank_api.model.dto.AccountWithUserDTO;
 import nl.inholland.bank_api.model.entities.Account;
@@ -16,9 +17,11 @@ import java.util.List;
 @Service
 public class AccountService {
     private final AccountRepository accountRepository;
+    private final AccountMapper accountMapper;
 
-    public AccountService(AccountRepository accountRepository) {
+    public AccountService(AccountRepository accountRepository, AccountMapper accountMapper) {
         this.accountRepository = accountRepository;
+        this.accountMapper = accountMapper;
     }
 
     public Account fetchAccountByIban(String iban) {
@@ -61,22 +64,8 @@ public class AccountService {
         return dto;
     }
 
-    private AccountWithUserDTO toAccountWithUserDTO(Account account) {
-        AccountWithUserDTO dto = new AccountWithUserDTO();
-        dto.setIban(account.getIban());
-        dto.setType(account.getType().name());
-        dto.setBalance(account.getBalance());
-
-        if (account.getUser() != null) {
-            dto.setFirstName(account.getUser().getFirstName());
-            dto.setLastName(account.getUser().getLastName());
-        }
-
-        return dto;
-    }
-
     public Page<AccountWithUserDTO> fetchAllAccounts(Pageable pageable) {
         Page<Account> accounts = accountRepository.findAll(pageable);
-        return accounts.map(this::toAccountWithUserDTO);
+        return accounts.map(accountMapper::toAccountWithUserDTO);
     }
 }

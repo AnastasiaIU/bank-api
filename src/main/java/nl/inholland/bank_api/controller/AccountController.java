@@ -3,6 +3,7 @@ package nl.inholland.bank_api.controller;
 import nl.inholland.bank_api.model.dto.AccountDTO;
 import nl.inholland.bank_api.model.dto.AccountWithUserDTO;
 import nl.inholland.bank_api.service.AccountService;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
@@ -35,8 +36,8 @@ public class AccountController {
 
     @PreAuthorize("hasRole('EMPLOYEE')")
     @GetMapping("/accounts")
-    public ResponseEntity<List<AccountWithUserDTO>> fetchAllAccounts(@PageableDefault(size = 10) Pageable pageable) {
-        List<AccountWithUserDTO> accounts = accountService.fetchAllAccounts(pageable).getContent();;
+    public ResponseEntity<Page<AccountWithUserDTO>> fetchAllAccounts(@PageableDefault(size = 10, page = 0) Pageable pageable) {
+        Page<AccountWithUserDTO> accounts = accountService.fetchAllAccounts(pageable);
         return ResponseEntity.ok(accounts);
     }
 }
