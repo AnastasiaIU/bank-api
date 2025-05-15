@@ -11,6 +11,7 @@ import nl.inholland.bank_api.model.enums.Status;
 import nl.inholland.bank_api.repository.AccountRepository;
 import nl.inholland.bank_api.repository.AtmTransactionRepository;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -33,6 +34,7 @@ public class AtmTransactionService {
         this.transactionMapper = atmTransactionMapper;
     }
 
+    @PreAuthorize("@securityService.isAccountOwner(#dto.iban)")
     public AtmTransactionDTO createTransaction(AtmTransactionRequestDTO dto, Account account, User initiatedBy) {
         AtmTransaction transaction = transactionMapper.toEntity(dto, account, initiatedBy);
         AtmTransaction saved = transactionRepository.save(transaction);
