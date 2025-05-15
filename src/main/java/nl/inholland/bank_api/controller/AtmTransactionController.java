@@ -40,9 +40,9 @@ public class AtmTransactionController {
         User currentUser = userService.getUserByEmail(email);
         Account account = accountService.fetchAccountByIban(dto.iban);
 
-        boolean isAdmin = UserRole.EMPLOYEE.equals(currentUser.getRole());
+        boolean isCustomer = UserRole.CUSTOMER.equals(currentUser.getRole());
 
-        if (!isAdmin && !currentUser.getId().equals(account.getUser().getId())) {
+        if (!isCustomer && !currentUser.getId().equals(account.getUser().getId())) {
             throw new AccessDeniedException("You are not allowed to perform this action.");
         }
 
