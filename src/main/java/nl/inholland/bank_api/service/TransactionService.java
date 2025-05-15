@@ -3,11 +3,12 @@ package nl.inholland.bank_api.service;
 import nl.inholland.bank_api.mapper.AtmTransactionMapper;
 import nl.inholland.bank_api.mapper.TransactionMapper;
 import nl.inholland.bank_api.model.dto.CombinedTransactionDTO;
-import nl.inholland.bank_api.model.dto.TransactionFilterDTO;
 import nl.inholland.bank_api.model.dto.TransactionRequestDTO;
 import nl.inholland.bank_api.model.dto.TransactionResponseDTO;
 import nl.inholland.bank_api.model.entities.Account;
+import nl.inholland.bank_api.model.entities.AtmTransaction;
 import nl.inholland.bank_api.model.entities.Transaction;
+import nl.inholland.bank_api.model.enums.AtmTransactionType;
 import nl.inholland.bank_api.model.enums.Operation;
 import nl.inholland.bank_api.model.enums.Status;
 import nl.inholland.bank_api.repository.AtmTransactionRepository;
@@ -82,20 +83,16 @@ public class TransactionService {
                 .findByAccountId(accountId)
                 .stream()
                 .map(atmTransactionMapper::toCombinedDTO);
-
         return Stream.concat(transferStream, atmStream);
     }
-
     private Stream<CombinedTransactionDTO> applyFilters(Stream<CombinedTransactionDTO> stream, TransactionFilterDTO filterDTO) {
         return stream.filter(dto -> matchesFilters(dto, filterDTO));
     }
-
     private boolean matchesFilters(CombinedTransactionDTO dto, TransactionFilterDTO filterDTO) {
         return matchesDate(dto.timestamp, filterDTO) &&
                 matchesAmount(dto.amount, filterDTO) &&
                 matchesIbans(dto.sourceIban, dto.targetIban, filterDTO);
     }
-
     private boolean matchesDate(LocalDateTime timestamp, TransactionFilterDTO filter) {
         if (filter.getStartDate() != null && !filter.getStartDate().isBlank()) {
             LocalDate start = LocalDate.parse(filter.getStartDate());
@@ -107,7 +104,6 @@ public class TransactionService {
         }
         return true;
     }
-
     private boolean matchesAmount(BigDecimal amount, TransactionFilterDTO filter) {
         System.out.println("Filtering amount: dto=" + amount + ", filterAmount=" + filter.getAmount() + ", comparison=" + filter.getComparison());
         if (filter.getAmount() != null && filter.getComparison() != null) {
@@ -125,11 +121,12 @@ public class TransactionService {
     }
 
     private boolean matchesIbans(String sourceIban, String targetIban, TransactionFilterDTO filter) {
-        if (filter.getSourceIban() != null && !filter.getSourceIban().isBlank() && !filter.getSourceIban().equals(sourceIban)) return false;
-        if (filter.getTargetIban() != null && !filter.getTargetIban().isBlank() && !filter.getTargetIban().equals(targetIban)) return false;
+        if (filter.getSourceIban() != null && !filter.getSourceIban().isBlank() && !filter.getSourceIban().equals(sourceIban))
+            return false;
+        if (filter.getTargetIban() != null && !filter.getTargetIban().isBlank() && !filter.getTargetIban().equals(targetIban))
+            return false;
         return true;
     }
-
     private boolean isTransactionSuccessful(Account sourceAccount, Account targetAccount, BigDecimal amount) {
         return sourceAccount != null &&
                 targetAccount != null &&
