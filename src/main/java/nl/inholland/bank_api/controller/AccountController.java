@@ -34,6 +34,12 @@ public class AccountController {
         return ResponseEntity.ok(accounts);
     }
 
+    @GetMapping("/users/accounts/{firstName}/{lastName}")
+    public ResponseEntity<List<AccountDTO>> fetchAccountsByName(@PathVariable String firstName, @PathVariable String lastName) {
+        List<AccountDTO> accounts = accountService.fetchAccountsByName(firstName, lastName);
+        return ResponseEntity.ok(accounts);
+    }
+
     @PreAuthorize("hasRole('EMPLOYEE')")
     @GetMapping("/accounts")
     public ResponseEntity<Page<AccountWithUserDTO>> fetchAllAccounts(@PageableDefault(size = 10, page = 0) Pageable pageable) {
