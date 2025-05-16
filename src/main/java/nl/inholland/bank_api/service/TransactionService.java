@@ -3,6 +3,7 @@ package nl.inholland.bank_api.service;
 import nl.inholland.bank_api.mapper.AtmTransactionMapper;
 import nl.inholland.bank_api.mapper.TransactionMapper;
 import nl.inholland.bank_api.model.dto.CombinedTransactionDTO;
+import nl.inholland.bank_api.model.dto.TransactionFilterDTO;
 import nl.inholland.bank_api.model.dto.TransactionRequestDTO;
 import nl.inholland.bank_api.model.dto.TransactionResponseDTO;
 import nl.inholland.bank_api.model.entities.Account;
@@ -127,6 +128,7 @@ public class TransactionService {
             return false;
         return true;
     }
+
     private boolean isTransactionSuccessful(Account sourceAccount, Account targetAccount, BigDecimal amount) {
         return sourceAccount != null &&
                 targetAccount != null &&
