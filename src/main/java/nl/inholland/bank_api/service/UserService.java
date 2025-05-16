@@ -5,6 +5,7 @@ import nl.inholland.bank_api.model.dto.*;
 import nl.inholland.bank_api.model.entities.Account;
 import nl.inholland.bank_api.model.entities.User;
 import nl.inholland.bank_api.model.enums.ApprovalStatus;
+import nl.inholland.bank_api.model.enums.ApprovalStatus;
 import nl.inholland.bank_api.repository.AccountRepository;
 import nl.inholland.bank_api.repository.UserRepository;
 import nl.inholland.bank_api.util.JwtUtil;
@@ -68,17 +69,15 @@ public class UserService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
     }
 
-    public User getUserById(Long id) {
-        return userRepository.findById(id).orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + id));
-    }
-
-
-
     public List<UserProfileDTO> getPendingUsers() {
         return userRepository.findByIsApproved(ApprovalStatus.PENDING)
                 .stream()
                 .map(userMapper::toProfileDTO)
                 .toList();
+    }
+
+    public User getUserById(Long id) {
+        return userRepository.findById(id).orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + id));
     }
 
     public void updateApprovalStatus(Long userId, ApprovalStatus approvalStatus, List<AccountWithUserDTO> accounts) {
