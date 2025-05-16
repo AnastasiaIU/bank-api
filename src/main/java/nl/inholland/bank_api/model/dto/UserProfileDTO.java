@@ -1,5 +1,6 @@
 package nl.inholland.bank_api.model.dto;
 
+import nl.inholland.bank_api.model.enums.ApprovalStatus;
 import nl.inholland.bank_api.model.enums.UserRole;
 
 public record UserProfileDTO(
@@ -9,7 +10,7 @@ public record UserProfileDTO(
         String email,
         String bsn,
         String phoneNumber,
-        boolean isApproved,
+        ApprovalStatus isApproved,
         UserRole role
 ) {
 }

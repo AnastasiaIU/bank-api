@@ -3,6 +3,7 @@ package nl.inholland.bank_api.mapper;
 import nl.inholland.bank_api.model.dto.RegisterRequestDTO;
 import nl.inholland.bank_api.model.dto.UserProfileDTO;
 import nl.inholland.bank_api.model.entities.User;
+import nl.inholland.bank_api.model.enums.ApprovalStatus;
 import nl.inholland.bank_api.model.enums.UserRole;
 import nl.inholland.bank_api.util.StringUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,7 +19,7 @@ public class UserMapper {
                 .password(encoder.encode(dto.password.trim()))
                 .bsn(dto.bsn.trim())
                 .phoneNumber(dto.phoneNumber.trim())
-                .isApproved(false)
+                .isApproved(ApprovalStatus.PENDING)
                 .role(UserRole.CUSTOMER)
                 .build();
     }
@@ -31,7 +32,7 @@ public class UserMapper {
                 user.getEmail(),
                 user.getBsn(),
                 user.getPhoneNumber(),
-                user.isApproved(),
+                user.getIsApproved(),
                 user.getRole()
         );
     }
