@@ -1,5 +1,6 @@
 package nl.inholland.bank_api.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import nl.inholland.bank_api.mapper.AtmTransactionMapper;
 import nl.inholland.bank_api.model.dto.AtmTransactionDTO;
 import nl.inholland.bank_api.model.dto.AtmTransactionRequestDTO;
@@ -10,7 +11,6 @@ import nl.inholland.bank_api.model.enums.AtmTransactionType;
 import nl.inholland.bank_api.model.enums.Status;
 import nl.inholland.bank_api.repository.AccountRepository;
 import nl.inholland.bank_api.repository.AtmTransactionRepository;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
@@ -34,7 +34,7 @@ public class AtmTransactionService {
         this.transactionMapper = atmTransactionMapper;
     }
 
-    @PreAuthorize("@securityService.isAccountOwner(#dto.iban)")
+    @PreAuthorize("@securityService.isOwnerOfAccount(#dto.iban)")
     public AtmTransactionDTO createTransaction(AtmTransactionRequestDTO dto, Account account, User initiatedBy) {
         AtmTransaction transaction = transactionMapper.toEntity(dto, account, initiatedBy);
         AtmTransaction saved = transactionRepository.save(transaction);
@@ -42,7 +42,14 @@ public class AtmTransactionService {
         return transactionMapper.toAtmTransactionDTO(saved);
     }
 
-    @Scheduled(fixedRate = 10000) // Every 10 seconds
+    @PreAuthorize("@securityService.isOwnerOfTransactionAccount(#id)")
+    public AtmTransactionDTO getTransaction(Long id) {
+        AtmTransaction transaction = transactionRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Transaction not found with id: " + id));
+
+        return transactionMapper.toAtmTransactionDTO(transaction);
+    }
+
     public void processPendingTransactions() {
         List<AtmTransaction> pendingTransactions = transactionRepository.findByStatus(Status.PENDING);
 
