@@ -41,4 +41,10 @@ public class AtmTransactionController {
         AtmTransactionDTO createdTransaction = atmTransactionService.createTransaction(dto, account, currentUser);
         return ResponseEntity.status(201).body(createdTransaction);
     }
+
+    @GetMapping("transactions/{id}")
+    public ResponseEntity<AtmTransactionDTO> getTransaction(@PathVariable Long id) {
+        AtmTransactionDTO transaction = atmTransactionService.getTransaction(id);
+        return ResponseEntity.ok(transaction);
+    }
 }
