@@ -11,6 +11,9 @@ public class AccountMapper {
         dto.setIban(account.getIban());
         dto.setType(account.getType().name());
         dto.setBalance(account.getBalance());
+        dto.setDailyLimit(account.getDailyLimit());
+        dto.setAbsoluteLimit(account.getAbsoluteLimit());
+        dto.setWithdrawLimit(account.getWithdrawLimit());
 
         if (account.getUser() != null) {
             dto.setFirstName(account.getUser().getFirstName());

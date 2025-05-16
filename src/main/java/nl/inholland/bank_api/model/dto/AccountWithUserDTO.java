@@ -10,4 +10,7 @@ public class AccountWithUserDTO {
     public BigDecimal balance;
     public String firstName;
     public String lastName;
+    public BigDecimal dailyLimit;
+    public BigDecimal absoluteLimit;
+    public BigDecimal withdrawLimit;
 }
