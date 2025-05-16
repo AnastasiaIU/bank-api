@@ -65,6 +65,7 @@ public class UserService {
         return userRepository.findByEmail(email.trim())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
     }
+
     public UserProfileDTO getProfileById(Long id) {
         return userRepository.findById(id)
                 .map(userMapper::toProfileDTO)
