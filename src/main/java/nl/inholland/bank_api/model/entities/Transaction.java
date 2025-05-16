@@ -41,5 +41,6 @@ public class Transaction {
     private String description;
 
     @Column()
+    @Enumerated(EnumType.STRING)
     private Status status;
 }
