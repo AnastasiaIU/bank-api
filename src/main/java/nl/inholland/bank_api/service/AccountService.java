@@ -44,6 +44,11 @@ public class AccountService {
         accountRepository.save(account);
     }
 
+    public List<AccountDTO> fetchAccountsByName(String firstName, String lastName) {
+        List<Account> accounts = accountRepository.findByFirstNameAndLastName(firstName, lastName);
+        return accounts.stream().map(this::toDTO).toList();
+    }
+
     public List<AccountDTO> fetchAccountsByUserId(Long userId) {
         List<Account> accounts = accountRepository.findByUserId(userId);
 
