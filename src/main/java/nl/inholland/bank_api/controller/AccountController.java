@@ -2,6 +2,7 @@ package nl.inholland.bank_api.controller;
 
 import nl.inholland.bank_api.model.dto.AccountDTO;
 import nl.inholland.bank_api.model.dto.AccountWithUserDTO;
+import nl.inholland.bank_api.model.dto.UpdateAccountLimitsDTO;
 import nl.inholland.bank_api.service.AccountService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,6 +12,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -45,5 +47,12 @@ public class AccountController {
     public ResponseEntity<Page<AccountWithUserDTO>> fetchAllAccounts(@PageableDefault(size = 10, page = 0) Pageable pageable) {
         Page<AccountWithUserDTO> accounts = accountService.fetchAllAccounts(pageable);
         return ResponseEntity.ok(accounts);
+    }
+
+    @PreAuthorize("hasRole('EMPLOYEE')")
+    @PutMapping("/accounts/{iban}/limits")
+    public ResponseEntity<?> updateAccountLimits(@PathVariable String iban, @RequestBody UpdateAccountLimitsDTO dto) {
+        accountService.updateAccountLimits(iban, dto);
+        return ResponseEntity.ok().build();
     }
 }
