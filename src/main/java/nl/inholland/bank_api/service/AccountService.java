@@ -4,6 +4,7 @@ import jakarta.persistence.EntityNotFoundException;
 import nl.inholland.bank_api.mapper.AccountMapper;
 import nl.inholland.bank_api.model.dto.AccountDTO;
 import nl.inholland.bank_api.model.dto.AccountWithUserDTO;
+import nl.inholland.bank_api.model.dto.UpdateAccountLimitsDTO;
 import nl.inholland.bank_api.model.entities.Account;
 import nl.inholland.bank_api.model.enums.Operation;
 import nl.inholland.bank_api.repository.AccountRepository;
@@ -69,4 +70,16 @@ public class AccountService {
         Page<Account> accounts = accountRepository.findAll(pageable);
         return accounts.map(accountMapper::toAccountWithUserDTO);
     }
+
+    public void updateAccountLimits(String iban, UpdateAccountLimitsDTO dto) {
+        Account account = accountRepository.findByIban(iban)
+                .orElseThrow(() -> new EntityNotFoundException("Account not found with iban: " + iban));
+
+        account.setDailyLimit(dto.getDailyLimit());
+        account.setAbsoluteLimit(dto.getAbsoluteLimit());
+        account.setWithdrawLimit(dto.getWithdrawLimit());
+
+        accountRepository.save(account);
+    }
+
 }
