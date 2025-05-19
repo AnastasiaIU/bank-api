@@ -5,6 +5,7 @@ import nl.inholland.bank_api.model.entities.Account;
 import nl.inholland.bank_api.model.entities.Transaction;
 import nl.inholland.bank_api.model.entities.User;
 import nl.inholland.bank_api.model.enums.AccountType;
+import nl.inholland.bank_api.model.enums.Status;
 import nl.inholland.bank_api.model.enums.UserRole;
 import nl.inholland.bank_api.repository.AccountRepository;
 import nl.inholland.bank_api.repository.TransactionRepository;
@@ -102,6 +103,7 @@ public class MyApplicationRunner implements ApplicationRunner {
                                 .description("Transfer from checking to savings")
                                 .sourceAccount(checking)
                                 .targetAccount(savings)
+                                .status(Status.SUCCEEDED)
                                 .timestamp(LocalDateTime.now())
                                 .build()
                 )
