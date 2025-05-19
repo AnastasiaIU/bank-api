@@ -10,5 +10,5 @@ import java.util.List;
 public class ApprovalStatusUpdateDTO {
     @NotNull
     private ApprovalStatus approvalStatus;
-    private List<AccountDTO> accounts;
+    private List<AccountWithUserDTO> accounts;
 }
