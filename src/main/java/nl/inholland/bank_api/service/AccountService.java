@@ -15,8 +15,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 @Service
 public class AccountService {
@@ -98,13 +100,16 @@ public class AccountService {
         createAccountForUser(user, AccountType.SAVINGS);
     }
 
-    private void createAccountForUser(User user, AccountType type) {
+    private Account createAccountForUser(Long id, AccountType type) {
         Account account = new Account();
-        account.setUser(user);
+        account.setUser(new User());
         account.setType(type);
         account.setBalance(BigDecimal.ZERO);
         account.setIban(generateUniqueIbanSafely());
-        accountRepository.save(account);
+        account.setAbsoluteLimit(BigDecimal.ZERO);
+        account.setWithdrawLimit(BigDecimal.ZERO);
+        account.setDailyLimit(BigDecimal.ZERO);
+         return account;
     }
 
     private String generateUniqueIbanSafely() {
@@ -119,5 +124,23 @@ public class AccountService {
         String checkDigits = String.format("%02d", new Random().nextInt(100));
         String randomDigits = String.format("%09d", new Random().nextInt(1_000_000_000));
         return COUNTRY_CODE + checkDigits + BANK_CODE + randomDigits;
+    }
+
+    public void saveAccounts(User user, List<AccountDTO> accountDTOs) {
+        List<Account> accounts = accountDTOs.stream()
+                .map(dto -> {
+                    Account account = new Account();
+                    account.setIban(dto.getIban());
+                    account.setType(AccountType.valueOf(dto.getType()));
+                    account.setBalance(dto.getBalance() != null ? dto.getBalance() : BigDecimal.ZERO);
+                    account.setAbsoluteLimit(dto.getAbsoluteLimit());
+                    account.setWithdrawLimit(dto.getWithdrawLimit());
+                    account.setDailyLimit(dto.getDailyLimit());
+                    account.setUser(user); // Associate with the given user
+                    return account;
+                })
+                .toList();
+
+        accountRepository.saveAll(accounts);
     }
 }

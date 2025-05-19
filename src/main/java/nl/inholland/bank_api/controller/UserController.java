@@ -21,12 +21,14 @@ public class UserController {
         return ResponseEntity.ok(pendingUsers);
     }
 
+
     @PutMapping("/users/{id}/approval")
     public ResponseEntity<Void> updateApprovalStatus(
             @PathVariable Long id,
             @RequestBody ApprovalStatusUpdateDTO request
     ) {
-        userService.updateApprovalStatus(id, request.getApprovalStatus());
+        userService.updateApprovalStatus(id, request.getApprovalStatus(), request.getAccounts());
         return ResponseEntity.noContent().build();
     }
+
 }
