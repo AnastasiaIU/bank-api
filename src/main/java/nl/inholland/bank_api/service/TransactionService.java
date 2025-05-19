@@ -88,7 +88,7 @@ public class TransactionService {
         return dto;
     }
 
-    public List<CombinedTransactionDTO> getFilteredTransactions(Long accountId, String onDate, String before, String after, BigDecimal amount, String comparison, String sourceIban, String targetIban) {
+    public List<CombinedTransactionDTO> getFilteredTransactions(Long accountId, String startDate, String endDate, BigDecimal amount, String comparison, String sourceIban, String targetIban) {
         Stream<CombinedTransactionDTO> transferStream = transactionRepository
                 .findBySourceAccount_IdOrTargetAccount_Id(accountId, accountId)
                 .stream()
@@ -100,17 +100,22 @@ public class TransactionService {
                 .map(this::mapAtmTransaction);
 
         return Stream.concat(transferStream, atmStream)
-                .filter(dto -> matchesFilters(dto, onDate, before, after, amount, comparison, sourceIban, targetIban))
+                .filter(dto -> matchesFilters(dto, startDate, endDate, amount, comparison, sourceIban, targetIban))
                 .collect(Collectors.toList());
     }
 
-    private boolean matchesFilters(CombinedTransactionDTO dto, String onDate, String before, String after,
+    private boolean matchesFilters(CombinedTransactionDTO dto, String startDate, String endDate,
                                    BigDecimal amount, String comparison, String sourceIban, String targetIban) {
         LocalDateTime ts = dto.timestamp;
 
-        if (onDate != null && !ts.toLocalDate().equals(LocalDate.parse(onDate))) return false;
-        if (before != null && ts.isAfter(LocalDateTime.parse(before))) return false;
-        if (after != null && ts.isBefore(LocalDateTime.parse(after))) return false;
+        if (startDate != null && !startDate.isBlank()) {
+            LocalDate start = LocalDate.parse(startDate);
+            if (ts.toLocalDate().isBefore(start)) return false;
+        }
+        if (endDate != null && !endDate.isBlank()) {
+            LocalDate end = LocalDate.parse(endDate);
+            if (ts.toLocalDate().isAfter(end)) return false;
+        }
 
         if (amount != null && comparison != null) {
             int cmp = dto.amount.compareTo(amount);
