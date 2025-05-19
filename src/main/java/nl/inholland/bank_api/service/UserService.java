@@ -81,7 +81,7 @@ public class UserService {
                 .toList();
     }
 
-    public void updateApprovalStatus(Long userId, ApprovalStatus approvalStatus, List<AccountDTO> accounts) {
+    public void updateApprovalStatus(Long userId, ApprovalStatus approvalStatus, List<AccountWithUserDTO> accounts) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 

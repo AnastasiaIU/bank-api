@@ -95,9 +95,14 @@ public class AccountService {
     }
 
 
-    public void createDefaultAccountsForUser(User user) {
-        createAccountForUser(user, AccountType.CHECKING);
-        createAccountForUser(user, AccountType.SAVINGS);
+    public List<AccountDTO> createAccountsByUserId(Long userId) {
+        List<Account> accounts = List.of(
+                createAccountForUser(userId, AccountType.CHECKING),
+                createAccountForUser(userId, AccountType.SAVINGS)
+        );
+        return accounts.stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
     }
 
     private Account createAccountForUser(Long id, AccountType type) {
@@ -126,7 +131,7 @@ public class AccountService {
         return COUNTRY_CODE + checkDigits + BANK_CODE + randomDigits;
     }
 
-    public void saveAccounts(User user, List<AccountDTO> accountDTOs) {
+    public void saveAccounts(User user, List<AccountWithUserDTO> accountDTOs) {
         List<Account> accounts = accountDTOs.stream()
                 .map(dto -> {
                     Account account = new Account();
