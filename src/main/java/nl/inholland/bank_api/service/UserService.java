@@ -1,12 +1,11 @@
 package nl.inholland.bank_api.service;
 
 import nl.inholland.bank_api.mapper.UserMapper;
-import nl.inholland.bank_api.model.dto.LoginRequestDTO;
-import nl.inholland.bank_api.model.dto.LoginResponseDTO;
-import nl.inholland.bank_api.model.dto.RegisterRequestDTO;
-import nl.inholland.bank_api.model.dto.UserProfileDTO;
+import nl.inholland.bank_api.model.dto.*;
+import nl.inholland.bank_api.model.entities.Account;
 import nl.inholland.bank_api.model.entities.User;
 import nl.inholland.bank_api.model.enums.ApprovalStatus;
+import nl.inholland.bank_api.repository.AccountRepository;
 import nl.inholland.bank_api.repository.UserRepository;
 import nl.inholland.bank_api.util.JwtUtil;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -69,6 +68,12 @@ public class UserService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
     }
 
+    public User getUserById(Long id) {
+        return userRepository.findById(id).orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + id));
+    }
+
+
+
     public List<UserProfileDTO> getPendingUsers() {
         return userRepository.findByIsApproved(ApprovalStatus.PENDING)
                 .stream()
@@ -76,14 +81,15 @@ public class UserService {
                 .toList();
     }
 
-    public void updateApprovalStatus (Long userId, ApprovalStatus approvalStatus) {
-        User user = userRepository.findById(userId).orElse(null);
+    public void updateApprovalStatus(Long userId, ApprovalStatus approvalStatus, List<AccountDTO> accounts) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
         user.setIsApproved(approvalStatus);
         userRepository.save(user);
 
-        if(approvalStatus == ApprovalStatus.APPROVED) {
-            accountService.createDefaultAccountsForUser(user);
+        if (approvalStatus == ApprovalStatus.APPROVED) {
+            accountService.saveAccounts(user, accounts);
         }
     }
 }
