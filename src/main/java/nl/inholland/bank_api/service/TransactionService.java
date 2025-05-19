@@ -27,11 +27,19 @@ public class TransactionService {
         return transactionRepository.save(toTransaction(dto)).getId();
     }
 
+    private Account fetchAccountByIban(String iban) {
+        try {
+            return accountService.fetchAccountByIban(iban);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     private Transaction toTransaction(TransactionRequestDTO dto) {
         Transaction transaction = new Transaction();
 
-        Account sourceAccount = accountService.fetchAccountByIban(dto.sourceAccount);
-        Account targetAccount = accountService.fetchAccountByIban(dto.targetAccount);
+        Account sourceAccount = fetchAccountByIban(dto.sourceAccount);
+        Account targetAccount = fetchAccountByIban(dto.targetAccount);
 
         transaction.setSourceAccount(sourceAccount);
         transaction.setTargetAccount(targetAccount);
