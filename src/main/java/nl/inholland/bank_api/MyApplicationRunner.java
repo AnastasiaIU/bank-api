@@ -5,6 +5,7 @@ import nl.inholland.bank_api.model.entities.Account;
 import nl.inholland.bank_api.model.entities.Transaction;
 import nl.inholland.bank_api.model.entities.User;
 import nl.inholland.bank_api.model.enums.AccountType;
+import nl.inholland.bank_api.model.enums.Status;
 import nl.inholland.bank_api.model.enums.ApprovalStatus;
 import nl.inholland.bank_api.model.enums.Status;
 import nl.inholland.bank_api.model.enums.ApprovalStatus;
