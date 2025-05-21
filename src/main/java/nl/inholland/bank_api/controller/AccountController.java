@@ -57,8 +57,8 @@ public class AccountController {
     }
 
     @GetMapping("/users/{id}/accounts/review")
-    public ResponseEntity<List<AccountDTO>> getUserAccounts(@PathVariable Long id) {
-        List<AccountDTO> accounts = accountService.createAccountsByUserId(id);
+    public ResponseEntity<List<AccountWithUserDTO>> getUserAccounts(@PathVariable Long id) {
+        List<AccountWithUserDTO> accounts = accountService.createAccountsByUserId(id);
         return ResponseEntity.ok(accounts);
     }
 }

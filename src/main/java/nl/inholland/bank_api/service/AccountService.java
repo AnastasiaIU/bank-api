@@ -94,13 +94,14 @@ public class AccountService {
     }
 
 
-    public List<AccountDTO> createAccountsByUserId(Long userId) {
+    public List<AccountWithUserDTO> createAccountsByUserId(Long userId) {
         List<Account> accounts = List.of(
                 createAccountForUser(userId, AccountType.CHECKING),
                 createAccountForUser(userId, AccountType.SAVINGS)
         );
+
         return accounts.stream()
-                .map(this::toDTO)
+                .map(accountMapper::toAccountWithUserDTO)
                 .collect(Collectors.toList());
     }
 
