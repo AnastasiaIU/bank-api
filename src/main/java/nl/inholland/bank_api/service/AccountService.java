@@ -133,17 +133,7 @@ public class AccountService {
 
     public void saveAccounts(User user, List<AccountWithUserDTO> accountDTOs) {
         List<Account> accounts = accountDTOs.stream()
-                .map(dto -> {
-                    Account account = new Account();
-                    account.setIban(dto.getIban());
-                    account.setType(AccountType.valueOf(dto.getType()));
-                    account.setBalance(dto.getBalance() != null ? dto.getBalance() : BigDecimal.ZERO);
-                    account.setAbsoluteLimit(dto.getAbsoluteLimit());
-                    account.setWithdrawLimit(dto.getWithdrawLimit());
-                    account.setDailyLimit(dto.getDailyLimit());
-                    account.setUser(user); // Associate with the given user
-                    return account;
-                })
+                .map(dto -> accountMapper.toAccount(dto, user))
                 .toList();
 
         accountRepository.saveAll(accounts);
