@@ -21,6 +21,12 @@ public class UserController {
         return ResponseEntity.ok(pendingUsers);
     }
 
+    @GetMapping("/users/{id}")
+    public ResponseEntity<UserProfileDTO> getUser(@PathVariable Long id) {
+        UserProfileDTO userProfileDTO = userService.getProfileById(id);
+                return ResponseEntity.ok(userProfileDTO);
+    }
+
 
     @PutMapping("/users/{id}/approval")
     public ResponseEntity<Void> updateApprovalStatus(
