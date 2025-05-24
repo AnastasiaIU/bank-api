@@ -79,13 +79,7 @@ public class GlobalExceptionHandler {
                 .distinct()
                 .toList();
 
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(new ExceptionDTO(
-                        HttpStatus.BAD_REQUEST.value(),
-                        e.getClass().getSimpleName(),
-                        validationErrors
-                ));
+        return buildError(HttpStatus.BAD_REQUEST, e, validationErrors.toArray(new String[0]));
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
@@ -98,12 +92,7 @@ public class GlobalExceptionHandler {
                 .distinct()
                 .toList();
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new ExceptionDTO(
-                        HttpStatus.BAD_REQUEST.value(),
-                        e.getClass().getSimpleName(),
-                        violations
-                ));
+        return buildError(HttpStatus.BAD_REQUEST, e, violations.toArray(new String[0]));
     }
 
     @ExceptionHandler(BadCredentialsException.class)
