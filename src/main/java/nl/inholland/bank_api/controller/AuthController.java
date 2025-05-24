@@ -1,5 +1,10 @@
 package nl.inholland.bank_api.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import nl.inholland.bank_api.model.dto.*;
 import nl.inholland.bank_api.service.UserService;
@@ -16,6 +21,31 @@ public class AuthController {
         this.userService = userService;
     }
 
+    @Operation(
+            summary = "Register a new user",
+            description = """
+                    This endpoint registers a new customer in the system.
+                    The input must include personal and login details like email, name, BSN, phone number, and password.
+                    """
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "201",
+                    description = "User successfully registered",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = RegisterResponseDTO.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid registration data",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionDTO.class)
+                    )
+            )
+    })
     @PostMapping("register")
     public ResponseEntity<RegisterResponseDTO> register(@Valid @RequestBody RegisterRequestDTO registerRequestDTO) {
         Long id = userService.createUser(registerRequestDTO);
