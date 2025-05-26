@@ -1,6 +1,9 @@
 package nl.inholland.bank_api.service;
 
+import nl.inholland.bank_api.mapper.AtmTransactionMapper;
+import nl.inholland.bank_api.mapper.TransactionMapper;
 import nl.inholland.bank_api.model.dto.CombinedTransactionDTO;
+import nl.inholland.bank_api.model.dto.TransactionFilterDTO;
 import nl.inholland.bank_api.model.dto.TransactionRequestDTO;
 import nl.inholland.bank_api.model.dto.TransactionResponseDTO;
 import nl.inholland.bank_api.model.entities.Account;
@@ -28,11 +31,15 @@ public class TransactionService {
     private final TransactionRepository transactionRepository;
     private final AccountService accountService;
     private final AtmTransactionRepository atmTransactionRepository;
+    private final AtmTransactionMapper atmTransactionMapper;
+    private final TransactionMapper transactionMapper;
 
-    public TransactionService(TransactionRepository transactionRepository, AccountService accountService, AtmTransactionRepository atmTransactionRepository) {
+    public TransactionService(TransactionRepository transactionRepository, AccountService accountService, AtmTransactionRepository atmTransactionRepository, AtmTransactionMapper atmTransactionMapper, TransactionMapper transactionMapper) {
         this.transactionRepository = transactionRepository;
         this.accountService = accountService;
         this.atmTransactionRepository = atmTransactionRepository;
+        this.atmTransactionMapper = atmTransactionMapper;
+        this.transactionMapper = transactionMapper;
     }
 
     public Long postTransaction(TransactionRequestDTO dto) {
@@ -69,74 +76,66 @@ public class TransactionService {
         return transaction;
     }
 
-    private CombinedTransactionDTO mapTransaction(Transaction t) {
-        CombinedTransactionDTO dto = new CombinedTransactionDTO();
-        dto.id = t.getId();
-        dto.type = "TRANSFER";
-        dto.sourceIban = t.getSourceAccount().getIban();
-        dto.targetIban = t.getTargetAccount().getIban();
-        dto.amount = t.getAmount();
-        dto.description = t.getDescription();
-        dto.timestamp = t.getTimestamp();
-        dto.status = t.getStatus();
-        return dto;
+    public List<CombinedTransactionDTO> getFilteredTransactions(Long accountId, TransactionFilterDTO filterDTO) {
+        Stream<CombinedTransactionDTO> combinedStream = getCombinedTransactionStream(accountId);
+        return applyFilters(combinedStream, filterDTO).collect(Collectors.toList());
     }
 
-    private CombinedTransactionDTO mapAtmTransaction(AtmTransaction atm) {
-        CombinedTransactionDTO dto = new CombinedTransactionDTO();
-        dto.id = atm.getId();
-        dto.type = "ATM";
-        dto.sourceIban = atm.getType() == AtmTransactionType.WITHDRAW ? atm.getAccount().getIban() : null;
-        dto.targetIban = atm.getType() == AtmTransactionType.DEPOSIT ? atm.getAccount().getIban() : null;
-        dto.amount = atm.getAmount();
-        dto.timestamp = atm.getTimestamp();
-        dto.status = atm.getStatus();
-        dto.failureReason = atm.getFailureReason();
-        dto.description = atm.getType().name();
-        return dto;
-    }
-
-    public List<CombinedTransactionDTO> getFilteredTransactions(Long accountId, String startDate, String endDate, BigDecimal amount, String comparison, String sourceIban, String targetIban) {
+    private Stream<CombinedTransactionDTO> getCombinedTransactionStream(Long accountId) {
         Stream<CombinedTransactionDTO> transferStream = transactionRepository
                 .findBySourceAccount_IdOrTargetAccount_Id(accountId, accountId)
                 .stream()
-                .map(this::mapTransaction);
+                .map(transactionMapper::toCombinedDTO);
 
         Stream<CombinedTransactionDTO> atmStream = atmTransactionRepository
                 .findByAccountId(accountId)
                 .stream()
-                .map(this::mapAtmTransaction);
+                .map(atmTransactionMapper::toCombinedDTO);
 
-        return Stream.concat(transferStream, atmStream)
-                .filter(dto -> matchesFilters(dto, startDate, endDate, amount, comparison, sourceIban, targetIban))
-                .collect(Collectors.toList());
+        return Stream.concat(transferStream, atmStream);
     }
 
-    private boolean matchesFilters(CombinedTransactionDTO dto, String startDate, String endDate,
-                                   BigDecimal amount, String comparison, String sourceIban, String targetIban) {
-        LocalDateTime ts = dto.timestamp;
+    private Stream<CombinedTransactionDTO> applyFilters(Stream<CombinedTransactionDTO> stream, TransactionFilterDTO filterDTO) {
+        return stream.filter(dto -> matchesFilters(dto, filterDTO));
+    }
 
-        if (startDate != null && !startDate.isBlank()) {
-            LocalDate start = LocalDate.parse(startDate);
-            if (ts.toLocalDate().isBefore(start)) return false;
+    private boolean matchesFilters(CombinedTransactionDTO dto, TransactionFilterDTO filterDTO) {
+        return matchesDate(dto.timestamp, filterDTO) &&
+                matchesAmount(dto.amount, filterDTO) &&
+                matchesIbans(dto.sourceIban, dto.targetIban, filterDTO);
+    }
+
+    private boolean matchesDate(LocalDateTime timestamp, TransactionFilterDTO filter) {
+        if (filter.getStartDate() != null && !filter.getStartDate().isBlank()) {
+            LocalDate start = LocalDate.parse(filter.getStartDate());
+            if (timestamp.toLocalDate().isBefore(start)) return false;
         }
-        if (endDate != null && !endDate.isBlank()) {
-            LocalDate end = LocalDate.parse(endDate);
-            if (ts.toLocalDate().isAfter(end)) return false;
+        if (filter.getEndDate() != null && !filter.getEndDate().isBlank()) {
+            LocalDate end = LocalDate.parse(filter.getEndDate());
+            if (timestamp.toLocalDate().isAfter(end)) return false;
         }
+        return true;
+    }
 
-        if (amount != null && comparison != null) {
-            int cmp = dto.amount.compareTo(amount);
-            if ((comparison.equals("lt") && cmp >= 0) ||
-                    (comparison.equals("gt") && cmp <= 0) ||
-                    (comparison.equals("eq") && cmp != 0)) {
-                return false;
-            }
+    private boolean matchesAmount(BigDecimal amount, TransactionFilterDTO filter) {
+        System.out.println("Filtering amount: dto=" + amount + ", filterAmount=" + filter.getAmount() + ", comparison=" + filter.getComparison());
+        if (filter.getAmount() != null && filter.getComparison() != null) {
+            int cmp = amount.compareTo(filter.getAmount());
+            boolean result = switch (filter.getComparison()) {
+                case "lt" -> cmp < 0;
+                case "gt" -> cmp > 0;
+                case "eq" -> cmp == 0;
+                default -> true;
+            };
+            System.out.println("Amount filter result: " + result);
+            return result;
         }
+        return true;
+    }
 
-        if (sourceIban != null && !sourceIban.equals(dto.sourceIban)) return false;
-        if (targetIban != null && !targetIban.equals(dto.targetIban)) return false;
-
+    private boolean matchesIbans(String sourceIban, String targetIban, TransactionFilterDTO filter) {
+        if (filter.getSourceIban() != null && !filter.getSourceIban().isBlank() && !filter.getSourceIban().equals(sourceIban)) return false;
+        if (filter.getTargetIban() != null && !filter.getTargetIban().isBlank() && !filter.getTargetIban().equals(targetIban)) return false;
         return true;
     }
 
