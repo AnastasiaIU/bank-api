@@ -56,7 +56,7 @@ public class AccountController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/users/{id}/accounts")
+    @GetMapping("/users/{id}/accounts/review")
     @PreAuthorize("hasRole('EMPLOYEE')")
     public ResponseEntity<List<AccountWithUserDTO>> createDefaultAccounts(@PathVariable Long id) {
         List<AccountWithUserDTO> accounts = accountService.createAccountsByUserId(id);
