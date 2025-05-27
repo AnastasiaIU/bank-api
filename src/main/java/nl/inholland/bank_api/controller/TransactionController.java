@@ -42,7 +42,6 @@ public class TransactionController {
 <<<<<<< HEAD
             @PathVariable Long accountId, @ModelAttribute TransactionFilterDTO transactionFilterDTO, Authentication authentication)
     {
-        System.out.println("FilterDTO received: " + transactionFilterDTO);
         String email = authentication.getName();
         User currentUser = userService.getUserByEmail(email);
 

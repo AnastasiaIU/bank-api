@@ -19,12 +19,9 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static java.util.Arrays.stream;
 
 @Service
 public class TransactionService {
@@ -70,6 +67,26 @@ public class TransactionService {
         }
 
         return transaction;
+    }
+
+    private boolean isTransactionSuccessful(Account sourceAccount, Account targetAccount, BigDecimal amount) {
+        if (sourceAccount == null || targetAccount == null || sourceAccount == targetAccount) {
+            return false;
+        }
+
+        // Check absolute limit
+        BigDecimal resultingBalance = sourceAccount.getBalance().subtract(amount);
+        if (resultingBalance.compareTo(sourceAccount.getAbsoluteLimit()) < 0) {
+            return false; // would go below absolute limit
+        }
+
+        // Check daily limit
+        BigDecimal totalToday = transactionRepository.sumAmountForAccountToday(sourceAccount.getId(), LocalDate.now());
+        if (totalToday.add(amount).compareTo(sourceAccount.getDailyLimit()) > 0) {
+            return false; // daily limit exceeded
+        }
+
+        return true;
     }
 
     public List<CombinedTransactionDTO> getFilteredTransactions(Long accountId, TransactionFilterDTO filterDTO) {
@@ -129,26 +146,6 @@ public class TransactionService {
             return false;
         if (filter.getTargetIban() != null && !filter.getTargetIban().isBlank() && !filter.getTargetIban().equals(targetIban))
             return false;
-        return true;
-    }
-
-    private boolean isTransactionSuccessful(Account sourceAccount, Account targetAccount, BigDecimal amount) {
-        if (sourceAccount == null || targetAccount == null || sourceAccount == targetAccount) {
-            return false;
-        }
-
-        // Check absolute limit
-        BigDecimal resultingBalance = sourceAccount.getBalance().subtract(amount);
-        if (resultingBalance.compareTo(sourceAccount.getAbsoluteLimit()) < 0) {
-            return false; // would go below absolute limit
-        }
-
-        // Check daily limit
-        BigDecimal totalToday = transactionRepository.sumAmountForAccountToday(sourceAccount.getId(), LocalDate.now());
-        if (totalToday.add(amount).compareTo(sourceAccount.getDailyLimit()) > 0) {
-            return false; // daily limit exceeded
-        }
-
         return true;
     }
 }
