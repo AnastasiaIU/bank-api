@@ -78,15 +78,16 @@ public class UserService {
                 .toList();
     }
 
-    public void updateApprovalStatus(Long userId, ApprovalStatus approvalStatus, List<AccountWithUserDTO> accounts) {
+    public void updateApprovalStatus(Long userId, ApprovalStatus approvalStatus) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-
         user.setIsApproved(approvalStatus);
         userRepository.save(user);
+    }
 
-        if (approvalStatus == ApprovalStatus.APPROVED) {
-            accountService.saveAccounts(user, accounts);
-        }
+    public void createAccountsForUser(Long userId, List<AccountWithUserDTO> accounts) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        accountService.saveAccounts(user, accounts);
     }
 }
