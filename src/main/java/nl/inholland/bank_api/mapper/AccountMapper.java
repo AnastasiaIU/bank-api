@@ -2,6 +2,8 @@ package nl.inholland.bank_api.mapper;
 
 import nl.inholland.bank_api.model.dto.AccountWithUserDTO;
 import nl.inholland.bank_api.model.entities.Account;
+import nl.inholland.bank_api.model.entities.User;
+import nl.inholland.bank_api.model.enums.AccountType;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -21,5 +23,17 @@ public class AccountMapper {
         }
 
         return dto;
+    }
+
+    public Account toAccount(AccountWithUserDTO dto, User user) {
+        Account account = new Account();
+        account.setIban(dto.getIban());
+        account.setType(AccountType.valueOf(dto.getType()));
+        account.setBalance(dto.getBalance());
+        account.setDailyLimit(dto.getDailyLimit());
+        account.setWithdrawLimit(dto.getWithdrawLimit());
+        account.setAbsoluteLimit(dto.getAbsoluteLimit());
+        account.setUser(user);
+        return account;
     }
 }

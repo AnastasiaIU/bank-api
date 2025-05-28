@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import nl.inholland.bank_api.model.enums.ApprovalStatus;
 import nl.inholland.bank_api.model.enums.UserRole;
 import java.util.List;
 
@@ -38,7 +39,8 @@ public class User {
     private String phoneNumber;
 
     @Column(nullable = false)
-    private boolean isApproved;
+    @Enumerated(EnumType.STRING)
+    private ApprovalStatus isApproved;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)

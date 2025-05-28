@@ -55,4 +55,11 @@ public class AccountController {
         accountService.updateAccountLimits(iban, dto);
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/users/{id}/accounts/review")
+    @PreAuthorize("hasRole('EMPLOYEE')")
+    public ResponseEntity<List<AccountWithUserDTO>> createDefaultAccounts(@PathVariable Long id) {
+        List<AccountWithUserDTO> accounts = accountService.createAccountsByUserId(id);
+        return ResponseEntity.ok(accounts);
+    }
 }
