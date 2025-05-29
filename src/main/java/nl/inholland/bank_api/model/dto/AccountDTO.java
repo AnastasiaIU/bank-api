@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 
 @Data
 public class AccountDTO {
+    public Long id;
     public Long userId;
     public String iban;
     public String type;

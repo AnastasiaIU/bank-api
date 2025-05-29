@@ -65,6 +65,7 @@ public class AccountService {
 
     private AccountDTO toDTO(Account account) {
         AccountDTO dto = new AccountDTO();
+        dto.setId(account.getId());
         dto.setIban(account.getIban());
         dto.setType(account.getType().name());
         dto.setBalance(account.getBalance());

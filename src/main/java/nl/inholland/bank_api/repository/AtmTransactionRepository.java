@@ -12,6 +12,7 @@ import java.util.List;
 
 public interface AtmTransactionRepository extends JpaRepository<AtmTransaction, Long> {
     List<AtmTransaction> findByStatus(Status status);
+    List<AtmTransaction> findByAccountId(Long accountId);
 
     @Query("SELECT COALESCE(SUM(t.amount), 0) " +
             "FROM AtmTransaction t " +
