@@ -28,11 +28,15 @@ public class TransactionService {
     private final TransactionRepository transactionRepository;
     private final AccountService accountService;
     private final AtmTransactionRepository atmTransactionRepository;
+    private final AtmTransactionMapper atmTransactionMapper;
+    private final TransactionMapper transactionMapper;
 
     public TransactionService(TransactionRepository transactionRepository, AccountService accountService, AtmTransactionRepository atmTransactionRepository, AtmTransactionMapper atmTransactionMapper, TransactionMapper transactionMapper) {
         this.transactionRepository = transactionRepository;
         this.accountService = accountService;
         this.atmTransactionRepository = atmTransactionRepository;
+        this.atmTransactionMapper = atmTransactionMapper;
+        this.transactionMapper = transactionMapper;
     }
 
     public Long postTransaction(TransactionRequestDTO dto) {

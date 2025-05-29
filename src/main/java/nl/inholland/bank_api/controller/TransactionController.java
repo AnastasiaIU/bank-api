@@ -2,10 +2,7 @@ package nl.inholland.bank_api.controller;
 
 import jakarta.validation.Valid;
 import nl.inholland.bank_api.model.dto.CombinedTransactionDTO;
-<<<<<<< HEAD
 import nl.inholland.bank_api.model.dto.TransactionFilterDTO;
-=======
->>>>>>> 0d1f036e6cb40cfb18e0f8e2849b6181203a46db
 import nl.inholland.bank_api.model.dto.TransactionRequestDTO;
 import nl.inholland.bank_api.model.entities.User;
 import nl.inholland.bank_api.service.AccountService;
@@ -39,7 +36,6 @@ public class TransactionController {
 
     @GetMapping("/accounts/{accountId}/transactions")
     public ResponseEntity<List<CombinedTransactionDTO>> getAllAccountTransactions(
-<<<<<<< HEAD
             @PathVariable Long accountId, @ModelAttribute TransactionFilterDTO transactionFilterDTO, Authentication authentication)
     {
         String email = authentication.getName();
@@ -52,22 +48,8 @@ public class TransactionController {
         if (!ownsAccount) {
             throw new AccessDeniedException("You are not authorized to view these transactions.");
         }
-        System.out.println("FilterDTO received: " + transactionFilterDTO);
         List<CombinedTransactionDTO> transactions = transactionService.getFilteredTransactions(
                 accountId, transactionFilterDTO);
-=======
-            @PathVariable Long accountId,
-            @RequestParam(required = false) String startDate,
-            @RequestParam(required = false) String endDate,
-            @RequestParam(required = false) BigDecimal amount,
-            @RequestParam(required = false) String comparison,
-            @RequestParam(required = false) String sourceIban,
-            @RequestParam(required = false) String targetIban
-    ) {
-        List<CombinedTransactionDTO> transactions = transactionService.getFilteredTransactions(
-                accountId, startDate, endDate, amount, comparison, sourceIban, targetIban
-        );
->>>>>>> 0d1f036e6cb40cfb18e0f8e2849b6181203a46db
         return ResponseEntity.ok(transactions);
     }
 }
