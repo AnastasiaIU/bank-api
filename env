@@ -1,6 +1,0 @@
-DB_PASSWORD=""
-DB_URL="jdbc:h2:mem:bankdb"
-DB_USER="sa"
-JWT_KEY_STORE="inholland.p12"
-JWT_KEY_STORE_PASSWORD="inholland"
-JWT_KEY_STORE_ALIAS="inholland"
