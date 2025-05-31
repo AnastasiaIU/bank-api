@@ -1,9 +1,7 @@
 package nl.inholland.bank_api.controller;
 
 import jakarta.validation.Valid;
-import nl.inholland.bank_api.model.dto.CombinedTransactionDTO;
-import nl.inholland.bank_api.model.dto.TransactionFilterDTO;
-import nl.inholland.bank_api.model.dto.TransactionRequestDTO;
+import nl.inholland.bank_api.model.dto.*;
 import nl.inholland.bank_api.model.entities.User;
 import nl.inholland.bank_api.service.AccountService;
 import nl.inholland.bank_api.service.TransactionService;
@@ -12,8 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.*;
+import nl.inholland.bank_api.model.entities.Account;
 
-import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -30,9 +28,12 @@ public class TransactionController {
     }
 
     @PostMapping("/transactions")
-    public ResponseEntity<?> postTransaction(@Valid @RequestBody TransactionRequestDTO dto) {
-        Long id = transactionService.postTransaction(dto);
-        return ResponseEntity.status(201).body(Collections.singletonMap("id", id));
+    public ResponseEntity<TransactionResponseDTO> postTransaction(@Valid @RequestBody TransactionRequestDTO dto) {
+        Account sourceAccount =  accountService.fetchAccountByIban(dto.sourceAccount);
+        Account targetAccount =  accountService.fetchAccountByIban(dto.targetAccount);
+
+        TransactionResponseDTO createdTransaction = transactionService.createTransaction(dto, sourceAccount, targetAccount);
+        return ResponseEntity.status(201).body(createdTransaction);
     }
 
     @GetMapping("/accounts/{accountId}/transactions")
@@ -52,5 +53,11 @@ public class TransactionController {
         List<CombinedTransactionDTO> transactions = transactionService.getFilteredTransactions(
                 accountId, transactionFilterDTO);
         return ResponseEntity.ok(transactions);
+    }
+
+    @GetMapping("transactions/{id}")
+    public ResponseEntity<TransactionResponseDTO> getTransactionById(@PathVariable Long id) {
+        TransactionResponseDTO transaction = transactionService.getTransaction(id);
+        return ResponseEntity.ok(transaction);
     }
 }

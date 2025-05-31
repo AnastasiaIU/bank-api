@@ -43,4 +43,7 @@ public class Transaction {
     @Column()
     @Enumerated(EnumType.STRING)
     private Status status;
+
+    @Column
+    private String failureReason;
 }

@@ -1,12 +1,10 @@
 package nl.inholland.bank_api.mapper;
 
-import nl.inholland.bank_api.model.dto.CombinedTransactionDTO;
-import nl.inholland.bank_api.model.dto.TransactionRequestDTO;
-import nl.inholland.bank_api.model.dto.TransactionResponseDTO;
-import nl.inholland.bank_api.model.entities.Account;
+import nl.inholland.bank_api.model.dto.*;
 import nl.inholland.bank_api.model.entities.Transaction;
-import nl.inholland.bank_api.model.enums.Status;
 import org.springframework.stereotype.Component;
+import nl.inholland.bank_api.model.entities.Account;
+import nl.inholland.bank_api.model.enums.Status;
 
 @Component
 public class TransactionMapper {
@@ -24,4 +22,28 @@ public class TransactionMapper {
         return dto;
     }
 
+    public TransactionResponseDTO toTransactionDTO(Transaction entity) {
+        return new TransactionResponseDTO(
+                entity.getId(),
+                entity.getSourceAccount().getId(),
+                entity.getTargetAccount().getId(),
+                entity.getAmount(),
+                entity.getDescription(),
+                entity.getStatus().name(),
+                entity.getSourceAccount().getIban(),
+                entity.getTargetAccount().getIban(),
+                entity.getTimestamp(),
+                entity.getFailureReason()
+        );
+    }
+
+    public Transaction toTransactionEntity(TransactionRequestDTO dto, Account source, Account target) {
+        return Transaction.builder()
+                .sourceAccount(source)
+                .targetAccount(target)
+                .amount(dto.amount)
+                .status(Status.PENDING)
+                .description(dto.description)
+                .build();
+    }
 }

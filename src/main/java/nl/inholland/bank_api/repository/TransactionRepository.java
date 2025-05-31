@@ -1,6 +1,7 @@
 package nl.inholland.bank_api.repository;
 
 import nl.inholland.bank_api.model.entities.Transaction;
+import nl.inholland.bank_api.model.enums.Status;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -11,6 +12,7 @@ import java.time.LocalDate;
 
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
     List<Transaction> findBySourceAccount_IdOrTargetAccount_Id(Long sourceId, Long targetId);
+    List<Transaction> findByStatus(Status status);
 
     @Query("SELECT COALESCE(SUM(t.amount), 0) FROM Transaction t " +
             "WHERE t.sourceAccount.id = :accountId " +

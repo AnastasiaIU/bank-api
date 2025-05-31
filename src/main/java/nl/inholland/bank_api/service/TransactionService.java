@@ -1,14 +1,14 @@
 package nl.inholland.bank_api.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import nl.inholland.bank_api.mapper.AtmTransactionMapper;
 import nl.inholland.bank_api.mapper.TransactionMapper;
-import nl.inholland.bank_api.model.dto.CombinedTransactionDTO;
-import nl.inholland.bank_api.model.dto.TransactionFilterDTO;
-import nl.inholland.bank_api.model.dto.TransactionRequestDTO;
+import nl.inholland.bank_api.model.dto.*;
 import nl.inholland.bank_api.model.entities.Account;
 import nl.inholland.bank_api.model.entities.Transaction;
 import nl.inholland.bank_api.model.enums.Operation;
 import nl.inholland.bank_api.model.enums.Status;
+import nl.inholland.bank_api.repository.AccountRepository;
 import nl.inholland.bank_api.repository.AtmTransactionRepository;
 import nl.inholland.bank_api.repository.TransactionRepository;
 import org.springframework.stereotype.Service;
@@ -23,71 +23,83 @@ import java.util.stream.Stream;
 @Service
 public class TransactionService {
     private final TransactionRepository transactionRepository;
-    private final AccountService accountService;
     private final AtmTransactionRepository atmTransactionRepository;
     private final AtmTransactionMapper atmTransactionMapper;
     private final TransactionMapper transactionMapper;
+    private final AccountRepository accountRepository;
 
-    public TransactionService(TransactionRepository transactionRepository, AccountService accountService, AtmTransactionRepository atmTransactionRepository, AtmTransactionMapper atmTransactionMapper, TransactionMapper transactionMapper) {
+    public TransactionService(TransactionRepository transactionRepository, AtmTransactionRepository atmTransactionRepository, AtmTransactionMapper atmTransactionMapper, TransactionMapper transactionMapper, AccountRepository accountRepository) {
         this.transactionRepository = transactionRepository;
-        this.accountService = accountService;
         this.atmTransactionRepository = atmTransactionRepository;
         this.atmTransactionMapper = atmTransactionMapper;
         this.transactionMapper = transactionMapper;
+        this.accountRepository = accountRepository;
     }
 
-    public Long postTransaction(TransactionRequestDTO dto) {
-        return transactionRepository.save(toTransaction(dto)).getId();
+    public TransactionResponseDTO createTransaction(TransactionRequestDTO dto, Account sourceAccount, Account targetAccount) {
+        Transaction transaction = transactionMapper.toTransactionEntity(dto,sourceAccount, targetAccount);
+        Transaction saved = transactionRepository.save(transaction);
+        return transactionMapper.toTransactionDTO(saved);
     }
 
-    private Account fetchAccountByIban(String iban) {
-        try {
-            return accountService.fetchAccountByIban(iban);
-        } catch (Exception e) {
-            return null;
+    public void processPendingTransactions() {
+        List<Transaction> pendingTransactions = transactionRepository.findByStatus(Status.PENDING);
+
+        for (Transaction transaction : pendingTransactions) {
+            processTransaction(transaction);
         }
     }
 
-    private Transaction toTransaction(TransactionRequestDTO dto) {
-        Transaction transaction = new Transaction();
+    private void processTransaction(Transaction transaction) {
+        Account source = transaction.getSourceAccount();
+        Account target = transaction.getTargetAccount();
+        BigDecimal amount = transaction.getAmount();
 
-        Account sourceAccount = fetchAccountByIban(dto.sourceAccount);
-        Account targetAccount = fetchAccountByIban(dto.targetAccount);
-
-        transaction.setSourceAccount(sourceAccount);
-        transaction.setTargetAccount(targetAccount);
-        transaction.setAmount(dto.amount);
-        transaction.setDescription(dto.description);
-
-        if (isTransactionSuccessful(sourceAccount, targetAccount, dto.amount)) {
-            transaction.setStatus(Status.SUCCEEDED);
-            accountService.updateBalance(sourceAccount, dto.amount, Operation.SUBTRACTION);
-            accountService.updateBalance(targetAccount, dto.amount, Operation.ADDITION);
+        if (source == null || target == null || source.equals(target)) {
+            updateStatus(transaction, Status.FAILED, "Invalid source or target account");
         } else {
-            transaction.setStatus(Status.FAILED);
+            BigDecimal projectedBalance = source.getBalance().subtract(amount);
+            if (projectedBalance.compareTo(source.getAbsoluteLimit()) < 0) {
+                updateStatus(transaction, Status.FAILED, "Absolute limit exceeded");
+            } else {
+                BigDecimal todayTotal = transactionRepository.sumAmountForAccountToday(source.getId(), LocalDate.now());
+                boolean isDailyLimitExceeded = todayTotal.add(amount).compareTo(source.getDailyLimit()) > 0;
+
+                if (isDailyLimitExceeded) {
+                    updateStatus(transaction, Status.FAILED, "Daily limit exceeded");
+                } else {
+                    updateStatus(transaction, Status.SUCCEEDED, null);
+
+                    updateBalance(source, amount, Operation.SUBTRACTION);
+                    updateBalance(target, amount, Operation.ADDITION);
+
+                    accountRepository.save(source);
+                    accountRepository.save(target);
+                }
+            }
         }
 
-        return transaction;
+        transactionRepository.save(transaction);
     }
 
-    private boolean isTransactionSuccessful(Account sourceAccount, Account targetAccount, BigDecimal amount) {
-        if (sourceAccount == null || targetAccount == null || sourceAccount == targetAccount) {
-            return false;
-        }
+    private void updateStatus(Transaction transaction, Status status, String failureReason) {
+        transaction.setStatus(status);
+        transaction.setFailureReason(failureReason);
+    }
 
-        // Check absolute limit
-        BigDecimal resultingBalance = sourceAccount.getBalance().subtract(amount);
-        if (resultingBalance.compareTo(sourceAccount.getAbsoluteLimit()) < 0) {
-            return false; // would go below absolute limit
+    private void updateBalance(Account account, BigDecimal amount, Operation operation) {
+        if (operation == Operation.ADDITION) {
+            account.setBalance(account.getBalance().add(amount));
+        } else if (operation == Operation.SUBTRACTION) {
+            account.setBalance(account.getBalance().subtract(amount));
         }
+    }
 
-        // Check daily limit
-        BigDecimal totalToday = transactionRepository.sumAmountForAccountToday(sourceAccount.getId(), LocalDate.now());
-        if (totalToday.add(amount).compareTo(sourceAccount.getDailyLimit()) > 0) {
-            return false; // daily limit exceeded
-        }
+    public TransactionResponseDTO getTransaction(Long id) {
+        Transaction transaction = transactionRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Transaction not found with id: " + id));
 
-        return true;
+        return transactionMapper.toTransactionDTO(transaction);
     }
 
     public List<CombinedTransactionDTO> getFilteredTransactions(Long accountId, TransactionFilterDTO filterDTO) {
@@ -107,14 +119,17 @@ public class TransactionService {
                 .map(atmTransactionMapper::toCombinedDTO);
         return Stream.concat(transferStream, atmStream);
     }
+
     private Stream<CombinedTransactionDTO> applyFilters(Stream<CombinedTransactionDTO> stream, TransactionFilterDTO filterDTO) {
         return stream.filter(dto -> matchesFilters(dto, filterDTO));
     }
+
     private boolean matchesFilters(CombinedTransactionDTO dto, TransactionFilterDTO filterDTO) {
         return matchesDate(dto.timestamp, filterDTO) &&
                 matchesAmount(dto.amount, filterDTO) &&
                 matchesIbans(dto.sourceIban, dto.targetIban, filterDTO);
     }
+
     private boolean matchesDate(LocalDateTime timestamp, TransactionFilterDTO filter) {
         if (filter.getStartDate() != null && !filter.getStartDate().isBlank()) {
             LocalDate start = LocalDate.parse(filter.getStartDate());
@@ -126,6 +141,7 @@ public class TransactionService {
         }
         return true;
     }
+
     private boolean matchesAmount(BigDecimal amount, TransactionFilterDTO filter) {
         System.out.println("Filtering amount: dto=" + amount + ", filterAmount=" + filter.getAmount() + ", comparison=" + filter.getComparison());
         if (filter.getAmount() != null && filter.getComparison() != null) {
