@@ -17,7 +17,7 @@ import org.springframework.context.annotation.Configuration;
         ),
         security = @SecurityRequirement(name = "bearer-jwt"),
         servers = {
-                @Server(url = "", description = "Production"),
+                @Server(url = "https://bank-api-1rn6.onrender.com", description = "Production"),
                 @Server(url = "http://localhost:8080", description = "Local Dev")
         }
 )

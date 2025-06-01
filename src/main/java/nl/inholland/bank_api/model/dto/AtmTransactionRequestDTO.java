@@ -5,6 +5,8 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import nl.inholland.bank_api.constant.ErrorMessages;
+import nl.inholland.bank_api.constant.RegexPatterns;
 import nl.inholland.bank_api.model.enums.AtmTransactionType;
 
 import java.math.BigDecimal;
@@ -15,16 +17,16 @@ import java.math.BigDecimal;
 )
 public class AtmTransactionRequestDTO {
     @Schema(example = "NL01INHO0123456789", description = "IBAN of the user's account")
-    @NotBlank(message = "Account number (IBAN) is required")
-    @Pattern(regexp = "^[A-Z]{2}[0-9]{2}[A-Z0-9]{11,30}$", message = "Invalid IBAN format")
+    @NotBlank(message = ErrorMessages.IBAN_REQUIRED)
+    @Pattern(regexp = RegexPatterns.IBAN, message = ErrorMessages.INVALID_IBAN_FORMAT)
     public String iban;
 
     @Schema(example = "WITHDRAW", description = "Transaction type (WITHDRAW or DEPOSIT)")
-    @NotNull(message = "Transaction type is required")
+    @NotNull(message = ErrorMessages.TRANSACTION_TYPE_REQUIRED)
     public AtmTransactionType type;
 
     @Schema(example = "250.75", description = "Amount to deposit or withdraw")
-    @NotNull(message = "Amount is required")
-    @DecimalMin(value = "0.01", message = "Amount must be greater than 0")
+    @NotNull(message = ErrorMessages.AMOUNT_REQUIRED)
+    @DecimalMin(value = "0.01", message = ErrorMessages.AMOUNT_MINIMUM)
     public BigDecimal amount;
 }
