@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.DecimalMin;
 import lombok.Data;
 import nl.inholland.bank_api.constant.ErrorMessages;
-
 import java.math.BigDecimal;
 
 @Data

@@ -1,7 +1,6 @@
 package nl.inholland.bank_api.model.dto;
 
 import java.math.BigDecimal;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
