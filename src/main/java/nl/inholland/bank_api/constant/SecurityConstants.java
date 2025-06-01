@@ -1,4 +1,4 @@
-package nl.inholland.bank_api.config;
+package nl.inholland.bank_api.constant;
 
 public class SecurityConstants {
     public static final String[] PUBLIC_ENDPOINTS = {

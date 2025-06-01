@@ -1,5 +1,6 @@
 package nl.inholland.bank_api.config;
 
+import nl.inholland.bank_api.constant.SecurityConstants;
 import nl.inholland.bank_api.util.JwtFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
