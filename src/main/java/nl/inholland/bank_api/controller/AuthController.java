@@ -65,7 +65,6 @@ public class AuthController {
                     )
             )
     )
-
     @ApiResponses({
             @ApiResponse(
                     responseCode = "200",
@@ -82,77 +81,76 @@ public class AuthController {
                             mediaType = "application/json",
                             schema = @Schema(implementation = ExceptionDTO.class),
                             examples = {
-                                    @io.swagger.v3.oas.annotations.media.ExampleObject(
+                                    @ExampleObject(
                                             name = "Missing both Fields",
                                             summary = "Missing email and password",
                                             value = """
-{
-  "status": 400,
-  "exception": "MethodArgumentNotValidException",
-  "message": [
-    "password: Password is required",
-    "email: Email is required"
-  ]
-}
-"""
+                        {
+                          "status": 400,
+                          "exception": "MethodArgumentNotValidException",
+                          "message": [
+                            "password: Password is required",
+                            "email: Email is required"
+                          ]
+                        }
+                    """
                                     ),
-                                    @io.swagger.v3.oas.annotations.media.ExampleObject(
+                                    @ExampleObject(
                                             name = "Invalid Email Format",
                                             summary = "Incorrect email format with missing password",
                                             value = """
-{
-  "status": 400,
-  "exception": "MethodArgumentNotValidException",
-  "message": [
-    "email: Incorrect email format",
-    "password: Password is required"
-  ]
-}
-"""
+                        {
+                          "status": 400,
+                          "exception": "MethodArgumentNotValidException",
+                          "message": [
+                            "email: Incorrect email format",
+                            "password: Password is required"
+                          ]
+                        }
+                    """
                                     ),
-                                    @io.swagger.v3.oas.annotations.media.ExampleObject(
+                                    @ExampleObject(
                                             name = "Invalid Email Only",
                                             summary = "Incorrect email format only",
                                             value = """
-{
-  "status": 400,
-  "exception": "MethodArgumentNotValidException",
-  "message": [
-    "email: Incorrect email format"
-  ]
-}
-"""
+                        {
+                          "status": 400,
+                          "exception": "MethodArgumentNotValidException",
+                          "message": [
+                            "email: Incorrect email format"
+                          ]
+                        }
+                    """
                                     ),
-                                    @io.swagger.v3.oas.annotations.media.ExampleObject(
+                                    @ExampleObject(
                                             name = "Missing Password Only",
                                             summary = "Missing password only",
                                             value = """
-{
-  "status": 400,
-  "exception": "MethodArgumentNotValidException",
-  "message": [
-    "password: Password is required"
-  ]
-}
-"""
+                        {
+                          "status": 400,
+                          "exception": "MethodArgumentNotValidException",
+                          "message": [
+                            "password: Password is required"
+                          ]
+                        }
+                    """
                                     ),
-                                    @io.swagger.v3.oas.annotations.media.ExampleObject(
+                                    @ExampleObject(
                                             name = "Missing Email Only",
                                             summary = "Missing email only",
                                             value = """
-{
-  "status": 400,
-  "exception": "MethodArgumentNotValidException",
-  "message": [
-    "email: Email is required"
-  ]
-}
-"""
+                        {
+                          "status": 400,
+                          "exception": "MethodArgumentNotValidException",
+                          "message": [
+                            "email: Email is required"
+                          ]
+                        }
+                    """
                                     )
                             }
                     )
             ),
-
             @ApiResponse(
                     responseCode = "401",
                     description = "Unauthorized - invalid email or password",
@@ -160,24 +158,23 @@ public class AuthController {
                             mediaType = "application/json",
                             schema = @Schema(implementation = ExceptionDTO.class),
                             examples = {
-                                    @io.swagger.v3.oas.annotations.media.ExampleObject(
+                                    @ExampleObject(
                                             name = "Bad Credentials",
                                             summary = "Invalid email or password",
                                             value = """
-                    {
-                      "status": 401,
-                      "exception": "BadCredentialsException",
-                      "message": [
-                        "Invalid email or password"
-                      ]
-                    }
+                        {
+                          "status": 401,
+                          "exception": "BadCredentialsException",
+                          "message": [
+                            "Invalid email or password"
+                          ]
+                        }
                     """
                                     )
                             }
                     )
             )
     })
-
     @PostMapping("login")
     public ResponseEntity<LoginResponseDTO> login(@Valid @RequestBody LoginRequestDTO request) {
         LoginResponseDTO response = userService.login(request);
