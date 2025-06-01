@@ -52,7 +52,10 @@ public class AccountService {
 
     public List<AccountDTO> fetchAccountsByName(String firstName, String lastName) {
         List<Account> accounts = accountRepository.findByFirstNameAndLastName(firstName, lastName);
-        return accounts.stream().map(this::toDTO).toList();
+        return accounts.stream()
+                .filter(account -> AccountType.CHECKING.equals(account.getType()))
+                .map(this::toDTO)
+                .toList();
     }
 
     public List<AccountDTO> fetchAccountsByUserId(Long userId) {
@@ -61,6 +64,15 @@ public class AccountService {
         return accounts.stream()
                 .map(this::toDTO)
                 .toList();
+    }
+
+    public List<AccountDTO> fetchCheckingAccountsByUserId(Long userId) {
+        List<Account> accounts = accountRepository.findByUserId(userId);
+        return  accounts.stream()
+                .filter(account -> AccountType.CHECKING.equals(account.getType()))
+                .map(this::toDTO)
+                .toList();
+
     }
 
     private AccountDTO toDTO(Account account) {

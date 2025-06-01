@@ -44,6 +44,12 @@ public class AccountController {
         return ResponseEntity.ok(accounts);
     }
 
+    @GetMapping("/users/{userId}/checking-accounts")
+    public ResponseEntity<List<AccountDTO>> fetchCheckingAccountsByUserId(@PathVariable Long userId) {
+        List<AccountDTO> accounts =  accountService.fetchCheckingAccountsByUserId(userId);
+        return ResponseEntity.ok(accounts);
+    }
+
     @GetMapping("/users/accounts/{firstName}/{lastName}")
     public ResponseEntity<List<AccountDTO>> fetchAccountsByName(@PathVariable String firstName, @PathVariable String lastName) {
         List<AccountDTO> accounts = accountService.fetchAccountsByName(firstName, lastName);
