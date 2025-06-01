@@ -7,4 +7,8 @@ public class StringUtils {
         }
         return str.substring(0, 1).toUpperCase() + str.substring(1).toLowerCase();
     }
+
+    public static String fieldError(String fieldName, String message) {
+        return String.format("%s: %s", fieldName, message);
+    }
 }

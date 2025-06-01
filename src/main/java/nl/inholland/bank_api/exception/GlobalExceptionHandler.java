@@ -3,6 +3,7 @@ package nl.inholland.bank_api.exception;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.java.Log;
+import nl.inholland.bank_api.constant.ErrorMessages;
 import nl.inholland.bank_api.model.dto.ExceptionDTO;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -34,8 +35,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ExceptionDTO> handleGeneric(Exception e) {
-        log.log(Level.SEVERE, "Unhandled exception", e);
-        return buildError(HttpStatus.INTERNAL_SERVER_ERROR, e, "Unexpected error occurred");
+        log.log(Level.SEVERE, ErrorMessages.UNHANDLED_EXCEPTION, e);
+        return buildError(HttpStatus.INTERNAL_SERVER_ERROR, e, ErrorMessages.UNEXPECTED_ERROR);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
@@ -47,7 +48,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ExceptionDTO> handleDataIntegrityViolation(DataIntegrityViolationException e) {
         log.severe(e.getMessage());
-        return buildError(HttpStatus.BAD_REQUEST, e, "Data Integrity Violation");
+        return buildError(HttpStatus.BAD_REQUEST, e, ErrorMessages.DATA_INTEGRITY_VIOLATION);
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
@@ -59,13 +60,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<ExceptionDTO> handleMethodNotSupported(HttpRequestMethodNotSupportedException e) {
         log.severe(e.getMessage());
-        return buildError(HttpStatus.METHOD_NOT_ALLOWED, e, "HTTP method not supported");
+        return buildError(HttpStatus.METHOD_NOT_ALLOWED, e, ErrorMessages.HTTP_METHOD_NOT_SUPPORTED);
     }
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ExceptionDTO> handleAccessDenied(AccessDeniedException e) {
         log.severe(e.getMessage());
-        return buildError(HttpStatus.FORBIDDEN, e, "Access denied");
+        return buildError(HttpStatus.FORBIDDEN, e, ErrorMessages.ACCESS_DENIED);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

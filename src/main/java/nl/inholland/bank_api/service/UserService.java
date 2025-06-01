@@ -1,11 +1,14 @@
 package nl.inholland.bank_api.service;
 
+import nl.inholland.bank_api.constant.ErrorMessages;
+import nl.inholland.bank_api.constant.FieldNames;
 import nl.inholland.bank_api.mapper.UserMapper;
 import nl.inholland.bank_api.model.dto.*;
 import nl.inholland.bank_api.model.entities.User;
 import nl.inholland.bank_api.model.enums.ApprovalStatus;
 import nl.inholland.bank_api.repository.UserRepository;
 import nl.inholland.bank_api.util.JwtUtil;
+import nl.inholland.bank_api.util.StringUtils;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -31,11 +34,11 @@ public class UserService {
 
     public Long createUser(RegisterRequestDTO dto) {
         if (userRepository.existsByEmail(dto.email.trim())) {
-            throw new IllegalArgumentException("email: Email already exists");
+            throw new IllegalArgumentException(StringUtils.fieldError(FieldNames.EMAIL, ErrorMessages.EMAIL_EXISTS));
         }
 
         if (userRepository.existsByBsn(dto.bsn.trim())) {
-            throw new IllegalArgumentException("bsn: BSN already exists");
+            throw new IllegalArgumentException(StringUtils.fieldError(FieldNames.BSN, ErrorMessages.BSN_EXISTS));
         }
 
         User user = userMapper.toEntity(dto, passwordEncoder);

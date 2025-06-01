@@ -1,6 +1,7 @@
 package nl.inholland.bank_api.service;
 
 import jakarta.persistence.EntityNotFoundException;
+import nl.inholland.bank_api.constant.ErrorMessages;
 import nl.inholland.bank_api.mapper.AtmTransactionMapper;
 import nl.inholland.bank_api.model.dto.AtmTransactionDTO;
 import nl.inholland.bank_api.model.dto.AtmTransactionRequestDTO;
@@ -45,7 +46,7 @@ public class AtmTransactionService {
     @PreAuthorize("@securityService.isOwnerOfTransactionAccount(#id)")
     public AtmTransactionDTO getTransaction(Long id) {
         AtmTransaction transaction = transactionRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Transaction not found with id: " + id));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorMessages.TRANSACTION_NOT_FOUND));
 
         return transactionMapper.toAtmTransactionDTO(transaction);
     }
@@ -71,7 +72,7 @@ public class AtmTransactionService {
             // Check against absolute limit
             BigDecimal projectedBalance = account.getBalance().subtract(amount);
             if (projectedBalance.compareTo(account.getAbsoluteLimit()) < 0) {
-                updateStatus(transaction, Status.FAILED, "Insufficient balance");
+                updateStatus(transaction, Status.FAILED, ErrorMessages.INSUFFICIENT_BALANCE);
             } else {
 
                 // Check the daily withdrawal limit
@@ -79,7 +80,7 @@ public class AtmTransactionService {
                 boolean isDailyLimitExceeded = todayTotal.compareTo(account.getWithdrawLimit()) > 0;
 
                 if (isDailyLimitExceeded) {
-                    updateStatus(transaction, Status.FAILED, "Daily withdrawal limit exceeded");
+                    updateStatus(transaction, Status.FAILED, ErrorMessages.DAILY_WITHDRAWAL_LIMIT_EXCEEDED);
                 } else {
                     updateStatus(transaction, Status.SUCCEEDED, null);
                     updateBalance(transaction, projectedBalance);
