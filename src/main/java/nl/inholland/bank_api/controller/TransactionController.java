@@ -5,6 +5,7 @@ import nl.inholland.bank_api.model.dto.CombinedTransactionDTO;
 import nl.inholland.bank_api.model.dto.TransactionFilterDTO;
 import nl.inholland.bank_api.model.dto.TransactionRequestDTO;
 import nl.inholland.bank_api.model.entities.User;
+import nl.inholland.bank_api.model.enums.UserRole;
 import nl.inholland.bank_api.service.AccountService;
 import nl.inholland.bank_api.service.TransactionService;
 import nl.inholland.bank_api.service.UserService;
@@ -41,12 +42,13 @@ public class TransactionController {
     {
         String email = authentication.getName();
         User currentUser = userService.getUserByEmail(email);
+        boolean isEmployee = UserRole.EMPLOYEE.equals(currentUser.getRole());
 
         boolean ownsAccount = accountService
                 .fetchAccountsByUserId(currentUser.getId())
                 .stream()
                 .anyMatch(account -> account.getId().equals(accountId));
-        if (!ownsAccount) {
+        if (!ownsAccount && !isEmployee) {
             throw new AccessDeniedException("You are not authorized to view these transactions.");
         }
         List<CombinedTransactionDTO> transactions = transactionService.getFilteredTransactions(

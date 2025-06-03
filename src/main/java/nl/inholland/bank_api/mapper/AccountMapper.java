@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 public class AccountMapper {
     public AccountWithUserDTO toAccountWithUserDTO(Account account) {
         AccountWithUserDTO dto = new AccountWithUserDTO();
+        dto.setId(account.getId());
         dto.setIban(account.getIban());
         dto.setStatus(account.getStatus().name());
         dto.setType(account.getType().name());
