@@ -28,6 +28,7 @@ public class ErrorMessages {
     public static final String HTTP_METHOD_NOT_SUPPORTED = "HTTP method not supported";
     public static final String ACCESS_DENIED = "Access denied";
     public static final String TRANSACTION_NOT_FOUND = "Transaction not found";
+    public static final String USER_NOT_FOUND = "User not found";
     public static final String INSUFFICIENT_BALANCE = "Insufficient balance";
     public static final String DAILY_WITHDRAWAL_LIMIT_EXCEEDED = "Daily withdrawal limit exceeded";
 }

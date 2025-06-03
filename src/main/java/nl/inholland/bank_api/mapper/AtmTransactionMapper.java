@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class AtmTransactionMapper {
     public AtmTransaction toEntity(AtmTransactionRequestDTO dto, Account account, User initiatedBy) {
-
         return AtmTransaction.builder()
                 .account(account)
                 .initiatedBy(initiatedBy)

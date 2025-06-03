@@ -18,7 +18,6 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class UserMapperTest {
-
     private final UserMapper mapper = new UserMapper();
 
     @Mock

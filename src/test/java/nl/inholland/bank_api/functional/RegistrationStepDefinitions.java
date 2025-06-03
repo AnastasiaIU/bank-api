@@ -45,9 +45,9 @@ public class RegistrationStepDefinitions {
         assertThat(json.has("id")).isTrue();
     }
 
-    @When("I register via POST \\/auth\\/register")
-    public void iRegisterViaPOSTAuthRegister() {
-        response = restTemplate.postForEntity("/auth/register", request, String.class);
+    @When("I register via POST {string}")
+    public void iRegisterViaPOSTAuthRegister(String endpoint) {
+        response = restTemplate.postForEntity(endpoint, request, String.class);
     }
 
     @Then("the response status should be {int}")

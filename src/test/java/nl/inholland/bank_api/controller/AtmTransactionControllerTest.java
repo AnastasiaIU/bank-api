@@ -24,6 +24,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
@@ -46,6 +47,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc(addFilters = false)
 @Import(GlobalExceptionHandler.class)
 class AtmTransactionControllerTest {
+    private final String ATM_TRANSACTIONS_ENDPOINT = "/atm/transactions";
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -102,7 +105,7 @@ class AtmTransactionControllerTest {
                 .thenReturn(response);
 
         // Perform the request and verify the response
-        mockMvc.perform(post("/atm/transactions")
+        mockMvc.perform(post(ATM_TRANSACTIONS_ENDPOINT)
                         .principal(auth())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -110,7 +113,8 @@ class AtmTransactionControllerTest {
                 .andExpect(jsonPath("$.id").value(5L));
 
         // Verify that the service was called with the correct parameters
-        verify(atmTransactionService).createTransaction(any(AtmTransactionRequestDTO.class), any(Account.class), any(User.class));
+        verify(atmTransactionService)
+                .createTransaction(any(AtmTransactionRequestDTO.class), any(Account.class), any(User.class));
     }
 
     @Test
@@ -119,7 +123,7 @@ class AtmTransactionControllerTest {
         request.iban = "";
 
         // Perform the request and verify the response
-        mockMvc.perform(post("/atm/transactions")
+        mockMvc.perform(post(ATM_TRANSACTIONS_ENDPOINT)
                         .principal(auth())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -137,16 +141,34 @@ class AtmTransactionControllerTest {
         // Mock the necessary services
         when(userService.getUserByEmail("john.doe@example.com")).thenReturn(new User());
         when(accountService.fetchAccountByIban(request.iban)).thenReturn(new Account());
-        when(atmTransactionService.createTransaction(any(AtmTransactionRequestDTO.class), any(Account.class), any(User.class)))
+        when(atmTransactionService
+                .createTransaction(any(AtmTransactionRequestDTO.class), any(Account.class), any(User.class)))
                 .thenThrow(new IllegalArgumentException(ErrorMessages.INSUFFICIENT_BALANCE));
 
         // Perform the request and verify the response
-        mockMvc.perform(post("/atm/transactions")
+        mockMvc.perform(post(ATM_TRANSACTIONS_ENDPOINT)
                         .principal(auth())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message", hasItem(ErrorMessages.INSUFFICIENT_BALANCE)));
+    }
+
+    @Test
+    void createTransactionReturns404WhenUserNotFound() throws Exception {
+        AtmTransactionRequestDTO request = getValidRequest(AtmTransactionType.DEPOSIT, new BigDecimal("50.00"));
+
+        // Mock the userService to throw the UsernameNotFoundException
+        when(userService.getUserByEmail("john.doe@example.com"))
+                .thenThrow(new UsernameNotFoundException(ErrorMessages.USER_NOT_FOUND));
+
+        // Perform the request and verify the response
+        mockMvc.perform(post(ATM_TRANSACTIONS_ENDPOINT)
+                        .principal(auth())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message", hasItem(ErrorMessages.USER_NOT_FOUND)));
     }
 
     @Test
@@ -159,7 +181,7 @@ class AtmTransactionControllerTest {
         when(atmTransactionService.getTransaction(5L)).thenReturn(response);
 
         // Perform the request and verify the response
-        mockMvc.perform(get("/atm/transactions/5"))
+        mockMvc.perform(get(ATM_TRANSACTIONS_ENDPOINT + "/5"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(5L));
 
@@ -174,7 +196,7 @@ class AtmTransactionControllerTest {
                 .thenThrow(new EntityNotFoundException(ErrorMessages.TRANSACTION_NOT_FOUND));
 
         // Perform the request and verify the response
-        mockMvc.perform(get("/atm/transactions/5"))
+        mockMvc.perform(get(ATM_TRANSACTIONS_ENDPOINT + "/5"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message", hasItem(ErrorMessages.TRANSACTION_NOT_FOUND)));
     }

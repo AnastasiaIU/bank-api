@@ -21,8 +21,8 @@ public class RegisterRequestDTO {
     public String lastName;
 
     @Schema(description = "User's email address", example = "john.doe@example.com")
-    @Email(message = ErrorMessages.INVALID_EMAIL_FORMAT)
     @NotBlank(message = ErrorMessages.EMAIL_REQUIRED)
+    @Email(message = ErrorMessages.INVALID_EMAIL_FORMAT)
     public String email;
 
     @Schema(description = "Password for the user account", example = "P@ssw0rd123")
