@@ -9,6 +9,9 @@ import nl.inholland.bank_api.model.enums.UserRole;
 import nl.inholland.bank_api.service.AccountService;
 import nl.inholland.bank_api.service.TransactionService;
 import nl.inholland.bank_api.service.UserService;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.access.AccessDeniedException;
@@ -37,22 +40,20 @@ public class TransactionController {
     }
 
     @GetMapping("/accounts/{accountId}/transactions")
-    public ResponseEntity<List<CombinedTransactionDTO>> getAllAccountTransactions(
-            @PathVariable Long accountId, @ModelAttribute TransactionFilterDTO transactionFilterDTO, Authentication authentication)
+    public ResponseEntity<Page<CombinedTransactionDTO>> getAllAccountTransactions(
+            @PathVariable Long accountId, @ModelAttribute TransactionFilterDTO transactionFilterDTO, @ParameterObject Pageable pageable, Authentication authentication)
     {
         String email = authentication.getName();
         User currentUser = userService.getUserByEmail(email);
         boolean isEmployee = UserRole.EMPLOYEE.equals(currentUser.getRole());
+        boolean ownsAccount = accountService.ownsAccount(currentUser.getId(), accountId);
 
-        boolean ownsAccount = accountService
-                .fetchAccountsByUserId(currentUser.getId())
-                .stream()
-                .anyMatch(account -> account.getId().equals(accountId));
         if (!ownsAccount && !isEmployee) {
             throw new AccessDeniedException("You are not authorized to view these transactions.");
         }
-        List<CombinedTransactionDTO> transactions = transactionService.getFilteredTransactions(
-                accountId, transactionFilterDTO);
+        Page<CombinedTransactionDTO> transactions = transactionService.getFilteredTransactions(
+                accountId, transactionFilterDTO, pageable);
+
         return ResponseEntity.ok(transactions);
     }
 }

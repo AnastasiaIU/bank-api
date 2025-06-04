@@ -15,4 +15,5 @@ public class TransactionFilterDTO {
     private String comparison;
     private String sourceIban;
     private String targetIban;
+    private String description;
 }

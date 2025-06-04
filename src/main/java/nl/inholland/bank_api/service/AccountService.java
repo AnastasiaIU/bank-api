@@ -169,4 +169,10 @@ public class AccountService {
         }
         accountRepository.saveAll(accounts);
     }
+
+    public boolean ownsAccount(Long userId, Long accountId){
+        return accountRepository.findByUserId(userId)
+                .stream()
+                .anyMatch(account -> account.getId().equals(accountId));
+    }
 }
