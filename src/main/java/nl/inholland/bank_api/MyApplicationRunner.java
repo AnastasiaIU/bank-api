@@ -4,10 +4,7 @@ import jakarta.transaction.Transactional;
 import nl.inholland.bank_api.model.entities.Account;
 import nl.inholland.bank_api.model.entities.Transaction;
 import nl.inholland.bank_api.model.entities.User;
-import nl.inholland.bank_api.model.enums.AccountType;
-import nl.inholland.bank_api.model.enums.ApprovalStatus;
-import nl.inholland.bank_api.model.enums.Status;
-import nl.inholland.bank_api.model.enums.UserRole;
+import nl.inholland.bank_api.model.enums.*;
 import nl.inholland.bank_api.repository.AccountRepository;
 import nl.inholland.bank_api.repository.TransactionRepository;
 import nl.inholland.bank_api.repository.UserRepository;
@@ -68,6 +65,38 @@ public class MyApplicationRunner implements ApplicationRunner {
                                 .phoneNumber("+1234567830")
                                 .isApproved(ApprovalStatus.REJECTED)
                                 .role(UserRole.CUSTOMER)
+                                .build(),
+                        User.builder()
+                                .firstName("Alice")
+                                .lastName("Johnson")
+                                .email("alice@example.com")
+                                .password(passwordEncoder.encode("1234"))
+                                .bsn("111111111")
+                                .phoneNumber("+31612345601")
+                                .isApproved(ApprovalStatus.PENDING)
+                                .role(UserRole.CUSTOMER)
+                                .build(),
+
+                        User.builder()
+                                .firstName("Bob")
+                                .lastName("Smith")
+                                .email("bob@example.com")
+                                .password(passwordEncoder.encode("1234"))
+                                .bsn("222222222")
+                                .phoneNumber("+31612345602")
+                                .isApproved(ApprovalStatus.PENDING)
+                                .role(UserRole.CUSTOMER)
+                                .build(),
+
+                        User.builder()
+                                .firstName("Carol")
+                                .lastName("Williams")
+                                .email("carol@example.com")
+                                .password(passwordEncoder.encode("1234"))
+                                .bsn("333333333")
+                                .phoneNumber("+31612345603")
+                                .isApproved(ApprovalStatus.PENDING)
+                                .role(UserRole.CUSTOMER)
                                 .build()
                 )
         );
@@ -77,6 +106,7 @@ public class MyApplicationRunner implements ApplicationRunner {
         Account checking = Account.builder()
                 .user(john)
                 .iban("NL91ABNA0417164300")
+                .status(AccountStatus.ACTIVE)
                 .type(AccountType.CHECKING)
                 .balance(BigDecimal.valueOf(10000.00))
                 .absoluteLimit(BigDecimal.valueOf(-300.00))
@@ -87,6 +117,7 @@ public class MyApplicationRunner implements ApplicationRunner {
         Account savings = Account.builder()
                 .user(john)
                 .iban("NL91ABNA0417164301")
+                .status(AccountStatus.ACTIVE)
                 .type(AccountType.SAVINGS)
                 .balance(BigDecimal.valueOf(50000.00))
                 .absoluteLimit(BigDecimal.valueOf(-100.00))

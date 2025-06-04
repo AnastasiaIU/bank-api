@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import nl.inholland.bank_api.model.enums.AccountStatus;
 import nl.inholland.bank_api.model.enums.AccountType;
 
 import java.math.BigDecimal;
@@ -23,6 +24,10 @@ public class Account {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
     private User user;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private AccountStatus status;
 
     @Column(nullable = false, unique = true)
     private String iban;
