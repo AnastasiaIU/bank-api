@@ -1,7 +1,7 @@
 package nl.inholland.bank_api.model.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import nl.inholland.bank_api.model.enums.ApprovalStatus;
+import nl.inholland.bank_api.model.enums.UserAccountStatus;
 import nl.inholland.bank_api.model.enums.UserRole;
 
 @Schema(description = "User data including personal details and account status.")
@@ -25,7 +25,7 @@ public record UserProfileDTO(
         String phoneNumber,
 
         @Schema(description = "Approval status of the user", example = "APPROVED")
-        ApprovalStatus isApproved,
+        UserAccountStatus isApproved,
 
         @Schema(description = "Role assigned to the user", example = "CUSTOMER")
         UserRole role

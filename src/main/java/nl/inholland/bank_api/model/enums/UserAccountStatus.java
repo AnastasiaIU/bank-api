@@ -1,7 +1,8 @@
 package nl.inholland.bank_api.model.enums;
 
-public enum ApprovalStatus {
+public enum UserAccountStatus {
     APPROVED,
     REJECTED,
-    PENDING
+    PENDING,
+    CLOSED
 }

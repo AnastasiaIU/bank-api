@@ -9,6 +9,7 @@ public class AccountDTO {
     public Long id;
     public Long userId;
     public String iban;
+    public String status;
     public String type;
     public BigDecimal balance;
 }

@@ -10,6 +10,9 @@ public class AccountWithUserDTO {
     @Schema(description = "The International Bank Account Number (IBAN) of the account.", example = "NL91ABNA0417164300")
     public String iban;
 
+    @Schema(description = "The status of account, e.g., ACTIVE, CLOSED.", example = "ACTIVE")
+    public String status;
+
     @Schema(description = "The type of account, e.g., CHECKING, SAVINGS.", example = "CHECKING")
     public String type;
 

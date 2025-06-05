@@ -3,7 +3,7 @@ package nl.inholland.bank_api.mapper;
 import nl.inholland.bank_api.model.dto.RegisterRequestDTO;
 import nl.inholland.bank_api.model.dto.UserProfileDTO;
 import nl.inholland.bank_api.model.entities.User;
-import nl.inholland.bank_api.model.enums.ApprovalStatus;
+import nl.inholland.bank_api.model.enums.UserAccountStatus;
 import nl.inholland.bank_api.model.enums.UserRole;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -50,7 +50,7 @@ class UserMapperTest {
         assertEquals("hashed", user.getPassword());
         assertEquals("123456789", user.getBsn());
         assertEquals("+31612345678", user.getPhoneNumber());
-        assertEquals(ApprovalStatus.PENDING, user.getIsApproved());
+        assertEquals(UserAccountStatus.PENDING, user.getIsApproved());
         assertEquals(UserRole.CUSTOMER, user.getRole());
 
         // Verify that the password was encoded
@@ -69,7 +69,7 @@ class UserMapperTest {
                 .password("pw")
                 .bsn("123456789")
                 .phoneNumber("+31612345678")
-                .isApproved(ApprovalStatus.APPROVED)
+                .isApproved(UserAccountStatus.APPROVED)
                 .role(UserRole.EMPLOYEE)
                 .build();
 
@@ -82,7 +82,7 @@ class UserMapperTest {
         assertEquals("john.doe@example.com", dto.email());
         assertEquals("123456789", dto.bsn());
         assertEquals("+31612345678", dto.phoneNumber());
-        assertEquals(ApprovalStatus.APPROVED, dto.isApproved());
+        assertEquals(UserAccountStatus.APPROVED, dto.isApproved());
         assertEquals(UserRole.EMPLOYEE, dto.role());
     }
 }

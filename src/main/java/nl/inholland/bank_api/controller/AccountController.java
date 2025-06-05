@@ -321,4 +321,11 @@ public class AccountController {
         List<AccountWithUserDTO> accounts = accountService.createAccountsByUserId(id);
         return ResponseEntity.ok(accounts);
     }
+
+    @DeleteMapping("/accounts/{iban}/close")
+    @PreAuthorize("hasRole('EMPLOYEE')")
+    public ResponseEntity<Void> closeAccount(@PathVariable String iban) {
+        accountService.closeAccountByIban(iban);
+        return ResponseEntity.noContent().build();
+    }
 }

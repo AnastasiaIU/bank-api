@@ -7,6 +7,7 @@ import nl.inholland.bank_api.model.dto.AccountWithUserDTO;
 import nl.inholland.bank_api.model.dto.UpdateAccountLimitsDTO;
 import nl.inholland.bank_api.model.entities.Account;
 import nl.inholland.bank_api.model.entities.User;
+import nl.inholland.bank_api.model.enums.AccountStatus;
 import nl.inholland.bank_api.model.enums.AccountType;
 import nl.inholland.bank_api.model.enums.Operation;
 import nl.inholland.bank_api.repository.AccountRepository;
@@ -79,6 +80,7 @@ public class AccountService {
         AccountDTO dto = new AccountDTO();
         dto.setId(account.getId());
         dto.setIban(account.getIban());
+        dto.setStatus(account.getStatus().name());
         dto.setType(account.getType().name());
         dto.setBalance(account.getBalance());
 
@@ -120,6 +122,7 @@ public class AccountService {
     private Account createAccountForUser(Long id, AccountType type) {
         Account account = new Account();
         account.setUser(new User());
+        account.setStatus(AccountStatus.ACTIVE);
         account.setType(type);
         account.setBalance(BigDecimal.ZERO);
         account.setIban(generateUniqueIbanSafely());
@@ -148,6 +151,22 @@ public class AccountService {
                 .map(dto -> accountMapper.toAccount(dto, user))
                 .toList();
 
+        accountRepository.saveAll(accounts);
+    }
+
+    public void closeAccountByIban(String iban) {
+        Account account = accountRepository.findByIban(iban)
+                .orElseThrow(() -> new EntityNotFoundException("Account not found"));
+
+        account.setStatus(AccountStatus.CLOSED);
+        accountRepository.save(account);
+    }
+
+    public void closeAllAccountsForUser(Long id) {
+        List<Account> accounts = accountRepository.findByUserId(id);
+        for (Account account : accounts) {
+            account.setStatus(AccountStatus.CLOSED);
+        }
         accountRepository.saveAll(accounts);
     }
 }
