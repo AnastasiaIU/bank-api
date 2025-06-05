@@ -19,15 +19,24 @@ public class UserController {
     }
 
     @GetMapping("/users/pending")
+    @PreAuthorize("hasRole('EMPLOYEE')")
     public ResponseEntity<List<UserProfileDTO>> getPendingUsers() {
         List<UserProfileDTO> pendingUsers = userService.getPendingUsers();
         return ResponseEntity.ok(pendingUsers);
     }
 
     @GetMapping("/users/{id}")
+    @PreAuthorize("hasRole('EMPLOYEE')")
     public ResponseEntity<UserProfileDTO> getUser(@PathVariable Long id) {
         UserProfileDTO userProfileDTO = userService.getProfileById(id);
                 return ResponseEntity.ok(userProfileDTO);
+    }
+
+    @GetMapping("/users/accounts/active")
+    @PreAuthorize("hasRole('EMPLOYEE')")
+    public ResponseEntity<List<UserProfileDTO>> getActiveUsers() {
+        List<UserProfileDTO> userProfileDTO = userService.getActiveUsers();
+        return ResponseEntity.ok(userProfileDTO);
     }
 
 
@@ -37,7 +46,7 @@ public class UserController {
             @PathVariable Long id,
             @RequestBody ApprovalStatusUpdateDTO request
     ) {
-        userService.updateApprovalStatus(id, request.getApprovalStatus());
+        userService.updateApprovalStatus(id, request.getUserAccountStatus());
         return ResponseEntity.noContent().build();
     }
 
@@ -51,4 +60,10 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
+    @PutMapping("/users/{id}/close")
+    @PreAuthorize("hasRole('EMPLOYEE')")
+    public ResponseEntity<Void> closeUserWithAccounts(@PathVariable Long id) {
+        userService.closeUserAndAccounts(id);
+        return ResponseEntity.noContent().build();
+    }
 }

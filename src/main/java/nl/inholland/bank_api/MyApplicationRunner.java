@@ -5,7 +5,7 @@ import nl.inholland.bank_api.model.entities.Account;
 import nl.inholland.bank_api.model.entities.Transaction;
 import nl.inholland.bank_api.model.entities.User;
 import nl.inholland.bank_api.model.enums.AccountType;
-import nl.inholland.bank_api.model.enums.ApprovalStatus;
+import nl.inholland.bank_api.model.enums.UserAccountStatus;
 import nl.inholland.bank_api.model.enums.Status;
 import nl.inholland.bank_api.model.enums.UserRole;
 import nl.inholland.bank_api.model.enums.AccountStatus;
@@ -47,7 +47,7 @@ public class MyApplicationRunner implements ApplicationRunner {
                                 .password(passwordEncoder.encode("admin"))
                                 .bsn("000000000")
                                 .phoneNumber("+1235550000")
-                                .isApproved(ApprovalStatus.APPROVED)
+                                .isApproved(UserAccountStatus.APPROVED)
                                 .role(UserRole.EMPLOYEE)
                                 .build(),
                         User.builder()
@@ -57,7 +57,7 @@ public class MyApplicationRunner implements ApplicationRunner {
                                 .password(passwordEncoder.encode("123"))
                                 .bsn("123456789")
                                 .phoneNumber("+1234567890")
-                                .isApproved(ApprovalStatus.APPROVED)
+                                .isApproved(UserAccountStatus.APPROVED)
                                 .role(UserRole.CUSTOMER)
                                 .build(),
                         User.builder()
@@ -67,7 +67,7 @@ public class MyApplicationRunner implements ApplicationRunner {
                                 .password(passwordEncoder.encode("1234"))
                                 .bsn("123456783")
                                 .phoneNumber("+1234567830")
-                                .isApproved(ApprovalStatus.REJECTED)
+                                .isApproved(UserAccountStatus.REJECTED)
                                 .role(UserRole.CUSTOMER)
                                 .build(),
                         User.builder()
@@ -77,7 +77,7 @@ public class MyApplicationRunner implements ApplicationRunner {
                                 .password(passwordEncoder.encode("1234"))
                                 .bsn("111111111")
                                 .phoneNumber("+31612345601")
-                                .isApproved(ApprovalStatus.PENDING)
+                                .isApproved(UserAccountStatus.PENDING)
                                 .role(UserRole.CUSTOMER)
                                 .build(),
 
@@ -88,7 +88,7 @@ public class MyApplicationRunner implements ApplicationRunner {
                                 .password(passwordEncoder.encode("1234"))
                                 .bsn("222222222")
                                 .phoneNumber("+31612345602")
-                                .isApproved(ApprovalStatus.PENDING)
+                                .isApproved(UserAccountStatus.PENDING)
                                 .role(UserRole.CUSTOMER)
                                 .build(),
 
@@ -99,7 +99,7 @@ public class MyApplicationRunner implements ApplicationRunner {
                                 .password(passwordEncoder.encode("1234"))
                                 .bsn("333333333")
                                 .phoneNumber("+31612345603")
-                                .isApproved(ApprovalStatus.PENDING)
+                                .isApproved(UserAccountStatus.PENDING)
                                 .role(UserRole.CUSTOMER)
                                 .build()
                 )

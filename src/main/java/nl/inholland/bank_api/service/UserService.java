@@ -5,7 +5,8 @@ import nl.inholland.bank_api.constant.FieldNames;
 import nl.inholland.bank_api.mapper.UserMapper;
 import nl.inholland.bank_api.model.dto.*;
 import nl.inholland.bank_api.model.entities.User;
-import nl.inholland.bank_api.model.enums.ApprovalStatus;
+import nl.inholland.bank_api.model.enums.UserAccountStatus;
+import nl.inholland.bank_api.model.enums.UserRole;
 import nl.inholland.bank_api.repository.UserRepository;
 import nl.inholland.bank_api.util.JwtUtil;
 import nl.inholland.bank_api.util.StringUtils;
@@ -76,16 +77,16 @@ public class UserService {
     }
 
     public List<UserProfileDTO> getPendingUsers() {
-        return userRepository.findByIsApproved(ApprovalStatus.PENDING)
+        return userRepository.findByIsApproved(UserAccountStatus.PENDING)
                 .stream()
                 .map(userMapper::toProfileDTO)
                 .toList();
     }
 
-    public void updateApprovalStatus(Long userId, ApprovalStatus approvalStatus) {
+    public void updateApprovalStatus(Long userId, UserAccountStatus userAccountStatus) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        user.setIsApproved(approvalStatus);
+        user.setIsApproved(userAccountStatus);
         userRepository.save(user);
     }
 
@@ -93,5 +94,22 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         accountService.saveAccounts(user, accounts);
+    }
+
+    public List<UserProfileDTO> getActiveUsers() {
+        return userRepository.findByIsApprovedAndRole(UserAccountStatus.APPROVED, UserRole.CUSTOMER)
+                .stream()
+                .map(userMapper::toProfileDTO)
+                .toList();
+    }
+
+    public void closeUserAndAccounts(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        user.setIsApproved(UserAccountStatus.CLOSED);
+        userRepository.save(user);
+
+        accountService.closeAllAccountsForUser(userId);
     }
 }

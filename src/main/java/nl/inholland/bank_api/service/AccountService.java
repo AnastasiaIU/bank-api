@@ -161,4 +161,12 @@ public class AccountService {
         account.setStatus(AccountStatus.CLOSED);
         accountRepository.save(account);
     }
+
+    public void closeAllAccountsForUser(Long id) {
+        List<Account> accounts = accountRepository.findByUserId(id);
+        for (Account account : accounts) {
+            account.setStatus(AccountStatus.CLOSED);
+        }
+        accountRepository.saveAll(accounts);
+    }
 }
