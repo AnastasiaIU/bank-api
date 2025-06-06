@@ -1,7 +1,9 @@
 package nl.inholland.bank_api.config;
 
 import nl.inholland.bank_api.constant.SecurityConstants;
-import nl.inholland.bank_api.util.JwtFilter;
+import nl.inholland.bank_api.filter.JwtFilter;
+import nl.inholland.bank_api.filter.RequestSizeFilter;
+import nl.inholland.bank_api.util.JwtUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -16,6 +18,7 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
 import java.util.List;
 
 @Configuration
@@ -29,7 +32,19 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtFilter jwtFilter) throws Exception {
+    public JwtFilter jwtFilter(JwtUtil jwtUtil) {
+        return new JwtFilter(jwtUtil);
+    }
+
+    @Bean
+    public RequestSizeFilter requestSizeFilter() {
+        return new RequestSizeFilter();
+    }
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(
+            HttpSecurity http, JwtFilter jwtFilter, RequestSizeFilter requestSizeFilter
+    ) throws Exception {
         http
                 .securityMatcher(new AntPathRequestMatcher("/**")) // Apply to all endpoints
                 .cors(cors -> cors.configure(http)) // Enable CORS
@@ -40,6 +55,7 @@ public class SecurityConfig {
                                 .requestMatchers(SecurityConstants.PUBLIC_ENDPOINTS).permitAll()
                                 .anyRequest().authenticated() // All other endpoints require auth
                 )
+                .addFilterBefore(requestSizeFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

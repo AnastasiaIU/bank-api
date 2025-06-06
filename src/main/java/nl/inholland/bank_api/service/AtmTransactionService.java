@@ -1,6 +1,7 @@
 package nl.inholland.bank_api.service;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import nl.inholland.bank_api.constant.ErrorMessages;
 import nl.inholland.bank_api.mapper.AtmTransactionMapper;
 import nl.inholland.bank_api.model.dto.AtmTransactionDTO;
@@ -51,28 +52,21 @@ public class AtmTransactionService {
         return transactionMapper.toAtmTransactionDTO(transaction);
     }
 
-    public void processPendingTransactions() {
-        List<AtmTransaction> pendingTransactions = transactionRepository.findByStatus(Status.PENDING);
-
-        for (AtmTransaction transaction : pendingTransactions) {
-            processTransaction(transaction);
-        }
-    }
-
-    private void processTransaction(AtmTransaction transaction) {
+    @Transactional
+    public void processTransaction(AtmTransaction transaction) {
         Account account = transaction.getAccount();
         BigDecimal amount = transaction.getAmount();
 
         if (transaction.getType() == AtmTransactionType.DEPOSIT) {
             BigDecimal newBalance = account.getBalance().add(amount);
-            updateStatus(transaction, Status.SUCCEEDED, null);
+            setTransactionStatus(transaction, Status.SUCCEEDED, null);
             updateBalance(transaction, newBalance);
         } else {
 
             // Check against absolute limit
             BigDecimal projectedBalance = account.getBalance().subtract(amount);
             if (projectedBalance.compareTo(account.getAbsoluteLimit()) < 0) {
-                updateStatus(transaction, Status.FAILED, ErrorMessages.INSUFFICIENT_BALANCE);
+                setTransactionStatus(transaction, Status.FAILED, ErrorMessages.INSUFFICIENT_BALANCE);
             } else {
 
                 // Check the daily withdrawal limit
@@ -80,9 +74,9 @@ public class AtmTransactionService {
                 boolean isDailyLimitExceeded = todayTotal.compareTo(account.getWithdrawLimit()) > 0;
 
                 if (isDailyLimitExceeded) {
-                    updateStatus(transaction, Status.FAILED, ErrorMessages.DAILY_WITHDRAWAL_LIMIT_EXCEEDED);
+                    setTransactionStatus(transaction, Status.FAILED, ErrorMessages.DAILY_WITHDRAWAL_LIMIT_EXCEEDED);
                 } else {
-                    updateStatus(transaction, Status.SUCCEEDED, null);
+                    setTransactionStatus(transaction, Status.SUCCEEDED, null);
                     updateBalance(transaction, projectedBalance);
                 }
             }
@@ -91,7 +85,11 @@ public class AtmTransactionService {
         transactionRepository.save(transaction);
     }
 
-    private void updateStatus(AtmTransaction transaction, Status status, String failureReason) {
+    public List<AtmTransaction> getPendingTransactions() {
+        return transactionRepository.findByStatus(Status.PENDING);
+    }
+
+    private void setTransactionStatus(AtmTransaction transaction, Status status, String failureReason) {
         transaction.setStatus(status);
         transaction.setFailureReason(failureReason);
     }
