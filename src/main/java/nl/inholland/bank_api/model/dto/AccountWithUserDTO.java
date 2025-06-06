@@ -7,6 +7,7 @@ import lombok.Data;
 @Data
 @Schema(description = "Account data combined with basic user information.")
 public class AccountWithUserDTO {
+    public Long id;
     @Schema(description = "The International Bank Account Number (IBAN) of the account.", example = "NL91ABNA0417164300")
     public String iban;
 
