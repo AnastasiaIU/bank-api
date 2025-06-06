@@ -32,8 +32,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-import static org.hamcrest.Matchers.anyOf;
-import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -118,9 +117,11 @@ class AtmTransactionControllerTest {
     }
 
     @Test
-    void createTransactionValidationErrorsReturn400() throws Exception {
-        AtmTransactionRequestDTO request = getValidRequest(AtmTransactionType.DEPOSIT, new BigDecimal("50.00"));
+    void createTransactionValidationErrorsReturn400ForEmptyDtoFields() throws Exception {
+        AtmTransactionRequestDTO request = new AtmTransactionRequestDTO();
         request.iban = "";
+        request.type = null;
+        request.amount = null;
 
         // Perform the request and verify the response
         mockMvc.perform(post(ATM_TRANSACTIONS_ENDPOINT)
@@ -128,14 +129,33 @@ class AtmTransactionControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message", anyOf(
-                        hasItem(StringUtils.fieldError(FieldNames.IBAN, ErrorMessages.IBAN_REQUIRED)),
-                        hasItem(StringUtils.fieldError(FieldNames.IBAN, ErrorMessages.INVALID_IBAN_FORMAT))
+                .andExpect(jsonPath("$.message", hasItems(
+                        StringUtils.fieldError(FieldNames.IBAN, ErrorMessages.IBAN_REQUIRED),
+                        StringUtils.fieldError(FieldNames.TYPE, ErrorMessages.TRANSACTION_TYPE_REQUIRED),
+                        StringUtils.fieldError(FieldNames.AMOUNT, ErrorMessages.AMOUNT_REQUIRED)
                 )));
     }
 
     @Test
-    void createTransactionReturns400WhenServiceThrowsException() throws Exception {
+    void createTransactionValidationErrorsReturn400ForInvalidDtoFields() throws Exception {
+        AtmTransactionRequestDTO request = new AtmTransactionRequestDTO();
+        request.iban = "123";
+        request.amount = new BigDecimal("-50.00");
+
+        // Perform the request and verify the response
+        mockMvc.perform(post(ATM_TRANSACTIONS_ENDPOINT)
+                        .principal(auth())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message", hasItems(
+                        StringUtils.fieldError(FieldNames.IBAN, ErrorMessages.INVALID_IBAN_FORMAT),
+                        StringUtils.fieldError(FieldNames.AMOUNT, ErrorMessages.AMOUNT_MINIMUM)
+                )));
+    }
+
+    @Test
+    void createTransactionReturns400WhenInsufficientBalance() throws Exception {
         AtmTransactionRequestDTO request = getValidRequest(AtmTransactionType.WITHDRAW, new BigDecimal("50.00"));
 
         // Mock the necessary services

@@ -27,7 +27,7 @@ class AtmTransactionMapperTest {
 
     @Test
     void toEntityMapsFieldsCorrectly() {
-        AtmTransactionRequestDTO dto = getValidRequest(AtmTransactionType.DEPOSIT, new BigDecimal("10.00"));
+        AtmTransactionRequestDTO dto = getValidRequest(AtmTransactionType.DEPOSIT, BigDecimal.TEN);
         Account account = new Account();
         User user = new User();
         AtmTransaction entity = mapper.toEntity(dto, account, user);

@@ -31,4 +31,5 @@ public class ErrorMessages {
     public static final String USER_NOT_FOUND = "User not found";
     public static final String INSUFFICIENT_BALANCE = "Insufficient balance";
     public static final String DAILY_WITHDRAWAL_LIMIT_EXCEEDED = "Daily withdrawal limit exceeded";
+    public static final String REQUEST_PAYLOAD_TOO_LARGE = "Request payload too large";
 }
