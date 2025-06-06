@@ -6,10 +6,16 @@ import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import nl.inholland.bank_api.constant.ErrorMessages;
+import nl.inholland.bank_api.constant.FieldNames;
 import nl.inholland.bank_api.model.dto.RegisterRequestDTO;
+import nl.inholland.bank_api.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.ResponseEntity;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -34,15 +40,66 @@ public class RegistrationStepDefinitions {
         request.phoneNumber = "+31612345678";
     }
 
-    @And("the first name is empty")
-    public void theFirstNameIsEmpty() {
-        request.firstName = "";
+    @Given("a registration payload with missing required fields")
+    public void aRegistrationPayloadWithMissingRequiredFields() {
+        request = new RegisterRequestDTO();
+    }
+
+    @Given("a registration payload with invalid formats")
+    public void aRegistrationPayloadWithInvalidFormats() {
+        request = new RegisterRequestDTO();
+        request.email = "invalid-email-format"; // Invalid email format
+        request.bsn = "02045078"; // Invalid BSN format (should be 9 digits)
+        request.phoneNumber = "123-45-00"; // Invalid phone number format
     }
 
     @And("the response should contain a user id")
     public void theResponseShouldContainAUserId() throws Exception {
         JsonNode json = objectMapper.readTree(response.getBody());
         assertThat(json.has("id")).isTrue();
+    }
+
+    @And("the response should contain missing fields")
+    public void theResponseShouldContainMissingFields() throws Exception {
+        JsonNode json = objectMapper.readTree(response.getBody());
+        JsonNode messages = json.get("message");
+
+        List<String> expectedMessages = List.of(
+                StringUtils.fieldError(FieldNames.FIRST_NAME, ErrorMessages.FIRST_NAME_REQUIRED),
+                StringUtils.fieldError(FieldNames.LAST_NAME, ErrorMessages.LAST_NAME_REQUIRED),
+                StringUtils.fieldError(FieldNames.EMAIL, ErrorMessages.EMAIL_REQUIRED),
+                StringUtils.fieldError(FieldNames.PASSWORD, ErrorMessages.PASSWORD_REQUIRED),
+                StringUtils.fieldError(FieldNames.BSN, ErrorMessages.BSN_REQUIRED),
+                StringUtils.fieldError(FieldNames.PHONE_NUMBER, ErrorMessages.PHONE_REQUIRED)
+        );
+
+        assertThat(messages).isNotNull();
+        List<String> actualMessages = new ArrayList<>();
+        for (JsonNode node : messages) {
+            actualMessages.add(node.asText());
+        }
+
+        assertThat(actualMessages).containsAll(expectedMessages);
+    }
+
+    @And("the response should contain fields with invalid format")
+    public void theResponseShouldContainFieldsWithInvalidFormat() throws Exception {
+        JsonNode json = objectMapper.readTree(response.getBody());
+        JsonNode messages = json.get("message");
+
+        List<String> expectedMessages = List.of(
+                StringUtils.fieldError(FieldNames.EMAIL, ErrorMessages.INVALID_EMAIL_FORMAT),
+                StringUtils.fieldError(FieldNames.BSN, ErrorMessages.INVALID_BSN_FORMAT),
+                StringUtils.fieldError(FieldNames.PHONE_NUMBER, ErrorMessages.INVALID_PHONE_FORMAT)
+        );
+
+        assertThat(messages).isNotNull();
+        List<String> actualMessages = new ArrayList<>();
+        for (JsonNode node : messages) {
+            actualMessages.add(node.asText());
+        }
+
+        assertThat(actualMessages).containsAll(expectedMessages);
     }
 
     @When("I register via POST {string}")
