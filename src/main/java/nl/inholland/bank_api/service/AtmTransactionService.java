@@ -26,7 +26,6 @@ public class AtmTransactionService {
     private final AtmTransactionRepository transactionRepository;
     private final AccountRepository accountRepository;
     private final AtmTransactionMapper transactionMapper;
-    private final SecurityService securityService;
 
     public AtmTransactionService(
             AtmTransactionRepository atmTransactionRepository,
