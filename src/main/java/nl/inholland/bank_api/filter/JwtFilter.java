@@ -5,6 +5,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import nl.inholland.bank_api.constant.ErrorMessages;
 import nl.inholland.bank_api.constant.SecurityConstants;
 import nl.inholland.bank_api.util.JwtUtil;
 import org.springframework.security.core.Authentication;
@@ -37,7 +38,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
             if (token == null) {
                 // Protected endpoint but token is missing
-                throw new JwtException("Missing token or Authorization header");
+                throw new JwtException(ErrorMessages.MISSING_TOKEN_OR_AUTHORIZATION_HEADER);
             }
 
             Authentication authentication = jwtUtil.validateToken(token);
