@@ -18,3 +18,15 @@ Feature: Registration
     When I register via POST "/auth/register"
     Then the response status should be 400
     And the response should contain fields with invalid format
+
+  Scenario: Failed to register because email already exists
+    Given a valid registration payload with existing email
+    When I register via POST "/auth/register"
+    Then the response status should be 409
+    And the response should indicate email existence
+
+  Scenario: Failed to register because BSN already exists
+    Given a valid registration payload with existing BSN
+    When I register via POST "/auth/register"
+    Then the response status should be 409
+    And the response should indicate BSN existence

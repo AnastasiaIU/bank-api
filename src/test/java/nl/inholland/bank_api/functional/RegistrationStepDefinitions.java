@@ -53,6 +53,28 @@ public class RegistrationStepDefinitions {
         request.phoneNumber = "123-45-00"; // Invalid phone number format
     }
 
+    @Given("a valid registration payload with existing email")
+    public void aValidRegistrationPayloadWithExistingEmail() {
+        request = new RegisterRequestDTO();
+        request.firstName = "Jane";
+        request.lastName = "Doe";
+        request.email = "123@mail.com"; // Existing email
+        request.password = "Password123!";
+        request.bsn = "020450789";
+        request.phoneNumber = "+31612345678";
+    }
+
+    @Given("a valid registration payload with existing BSN")
+    public void aValidRegistrationPayloadWithExistingBsn() {
+        request = new RegisterRequestDTO();
+        request.firstName = "Dane";
+        request.lastName = "Doe";
+        request.email = "dane.doe@example.com";
+        request.password = "Password123!";
+        request.bsn = "123456789";  // Existing BSN
+        request.phoneNumber = "+31612345678";
+    }
+
     @And("the response should contain a user id")
     public void theResponseShouldContainAUserId() throws Exception {
         JsonNode json = objectMapper.readTree(response.getBody());
@@ -100,6 +122,36 @@ public class RegistrationStepDefinitions {
         }
 
         assertThat(actualMessages).containsAll(expectedMessages);
+    }
+
+    @And("the response should indicate email existence")
+    public void theResponseShouldIndicateEmailExistence() throws Exception {
+        JsonNode json = objectMapper.readTree(response.getBody());
+        JsonNode messages = json.get("message");
+
+        assertThat(messages).isNotNull();
+        List<String> actualMessages = new ArrayList<>();
+        for (JsonNode node : messages) {
+            actualMessages.add(node.asText());
+        }
+
+        assertThat(actualMessages)
+                .contains(StringUtils.fieldError(FieldNames.EMAIL, ErrorMessages.EMAIL_EXISTS));
+    }
+
+    @And("the response should indicate BSN existence")
+    public void theResponseShouldIndicateBsnExistence() throws Exception {
+        JsonNode json = objectMapper.readTree(response.getBody());
+        JsonNode messages = json.get("message");
+
+        assertThat(messages).isNotNull();
+        List<String> actualMessages = new ArrayList<>();
+        for (JsonNode node : messages) {
+            actualMessages.add(node.asText());
+        }
+
+        assertThat(actualMessages)
+                .contains(StringUtils.fieldError(FieldNames.BSN, ErrorMessages.BSN_EXISTS));
     }
 
     @When("I register via POST {string}")

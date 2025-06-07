@@ -137,7 +137,10 @@ class AtmTransactionServiceTest {
 
     @Test
     void getTransactionThrowsWhenNotFound() {
+        // Mock repository to return empty for non-existing transaction
         when(transactionRepository.findById(1L)).thenReturn(Optional.empty());
+
+        // Assert that EntityNotFoundException is thrown with the correct message
         EntityNotFoundException e = assertThrows(EntityNotFoundException.class,
                 () -> service.getTransaction(1L));
         assertEquals(ErrorMessages.TRANSACTION_NOT_FOUND, e.getMessage());
