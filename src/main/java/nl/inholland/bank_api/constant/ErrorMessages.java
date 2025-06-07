@@ -13,6 +13,7 @@ public class ErrorMessages {
     public static final String PHONE_REQUIRED = "Phone number is required";
     public static final String TRANSACTION_TYPE_REQUIRED = "Transaction type is required";
     public static final String AMOUNT_REQUIRED = "Amount is required";
+    public static final String INVALID_EMAIL_OR_PASSWORD = "Invalid email or password";
 
     public static final String INVALID_EMAIL_FORMAT = "Invalid email format";
     public static final String INVALID_BSN_FORMAT = "BSN must be exactly 9 digits";

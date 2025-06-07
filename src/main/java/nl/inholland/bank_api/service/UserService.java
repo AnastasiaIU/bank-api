@@ -50,10 +50,10 @@ public class UserService {
 
     public LoginResponseDTO login(LoginRequestDTO loginRequest) {
         User user = userRepository.findByEmail(loginRequest.email.trim())
-                .orElseThrow(() -> new BadCredentialsException("Invalid email or password"));
+                .orElseThrow(() -> new BadCredentialsException(ErrorMessages.INVALID_EMAIL_OR_PASSWORD));
 
         if (!passwordEncoder.matches(loginRequest.password, user.getPassword())) {
-            throw new BadCredentialsException("Invalid email or password");
+            throw new BadCredentialsException(ErrorMessages.INVALID_EMAIL_OR_PASSWORD);
         }
 
         String token = jwtUtil.generateToken(user.getEmail(), user.getRole(), user.getId());
