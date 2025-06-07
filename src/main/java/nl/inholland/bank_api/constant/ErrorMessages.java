@@ -29,7 +29,10 @@ public class ErrorMessages {
     public static final String ACCESS_DENIED = "Access denied";
     public static final String TRANSACTION_NOT_FOUND = "Transaction not found";
     public static final String USER_NOT_FOUND = "User not found";
+    public static final String ACCOUNT_NOT_FOUND = "Account not found";
     public static final String INSUFFICIENT_BALANCE = "Insufficient balance";
     public static final String DAILY_WITHDRAWAL_LIMIT_EXCEEDED = "Daily withdrawal limit exceeded";
     public static final String REQUEST_PAYLOAD_TOO_LARGE = "Request payload too large";
+    public static final String MISSING_TOKEN_OR_AUTHORIZATION_HEADER = "Missing token or Authorization header";
+    public static final String UNKNOWN_ERROR_KEY = "Unknown error key";
 }

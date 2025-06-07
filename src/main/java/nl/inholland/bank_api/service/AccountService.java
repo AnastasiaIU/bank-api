@@ -1,6 +1,7 @@
 package nl.inholland.bank_api.service;
 
 import jakarta.persistence.EntityNotFoundException;
+import nl.inholland.bank_api.constant.ErrorMessages;
 import nl.inholland.bank_api.mapper.AccountMapper;
 import nl.inholland.bank_api.model.dto.AccountDTO;
 import nl.inholland.bank_api.model.dto.AccountWithUserDTO;
@@ -34,7 +35,7 @@ public class AccountService {
 
     public Account fetchAccountByIban(String iban) {
         return accountRepository.findByIban(iban.trim())
-                .orElseThrow(() -> new EntityNotFoundException("Account not found for IBAN: " + iban));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorMessages.ACCOUNT_NOT_FOUND));
     }
 
     public AccountDTO fetchAccountDTOByIban(String iban) {
