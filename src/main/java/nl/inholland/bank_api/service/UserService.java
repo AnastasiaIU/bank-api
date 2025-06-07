@@ -77,6 +77,10 @@ public class UserService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + id));
     }
 
+    public User getUserById(Long id) {
+        return userRepository.findById(id).orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + id));
+    }
+
     public List<UserProfileDTO> getPendingUsers() {
         return userRepository.findByIsApproved(UserAccountStatus.PENDING)
                 .stream()

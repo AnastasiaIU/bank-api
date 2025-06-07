@@ -139,6 +139,7 @@ public class MyApplicationRunner implements ApplicationRunner {
                                 .description("Transfer from checking to savings")
                                 .sourceAccount(checking)
                                 .targetAccount(savings)
+                                .initiatedBy(users.getFirst())
                                 .status(Status.SUCCEEDED)
                                 .timestamp(LocalDateTime.now())
                                 .build()
