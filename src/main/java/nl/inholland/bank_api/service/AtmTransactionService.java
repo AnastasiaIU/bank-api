@@ -35,7 +35,6 @@ public class AtmTransactionService {
         this.transactionRepository = atmTransactionRepository;
         this.accountRepository = accountRepository;
         this.transactionMapper = atmTransactionMapper;
-        this.securityService = securityService;
     }
 
     public List<AtmHistoryTransactionDTO> getAllTransactions() {
