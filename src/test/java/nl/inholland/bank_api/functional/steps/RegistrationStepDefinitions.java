@@ -1,18 +1,16 @@
-package nl.inholland.bank_api.functional;
+package nl.inholland.bank_api.functional.steps;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
-import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import nl.inholland.bank_api.constant.ErrorMessages;
 import nl.inholland.bank_api.constant.FieldNames;
+import nl.inholland.bank_api.functional.TestContext;
 import nl.inholland.bank_api.model.dto.RegisterRequestDTO;
 import nl.inholland.bank_api.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.http.ResponseEntity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,10 +22,9 @@ public class RegistrationStepDefinitions {
     private TestRestTemplate restTemplate;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private TestContext context;
 
     private RegisterRequestDTO request;
-    private ResponseEntity<String> response;
 
     @Given("a valid registration payload")
     public void aValidRegistrationPayload() {
@@ -53,15 +50,37 @@ public class RegistrationStepDefinitions {
         request.phoneNumber = "123-45-00"; // Invalid phone number format
     }
 
+    @Given("a valid registration payload with existing email")
+    public void aValidRegistrationPayloadWithExistingEmail() {
+        request = new RegisterRequestDTO();
+        request.firstName = "Jane";
+        request.lastName = "Doe";
+        request.email = "123@mail.com"; // Existing email
+        request.password = "Password123!";
+        request.bsn = "020450789";
+        request.phoneNumber = "+31612345678";
+    }
+
+    @Given("a valid registration payload with existing BSN")
+    public void aValidRegistrationPayloadWithExistingBsn() {
+        request = new RegisterRequestDTO();
+        request.firstName = "Dane";
+        request.lastName = "Doe";
+        request.email = "dane.doe@example.com";
+        request.password = "Password123!";
+        request.bsn = "123456789";  // Existing BSN
+        request.phoneNumber = "+31612345678";
+    }
+
     @And("the response should contain a user id")
     public void theResponseShouldContainAUserId() throws Exception {
-        JsonNode json = objectMapper.readTree(response.getBody());
+        JsonNode json = context.getObjectMapper().readTree(context.getResponse().getBody());
         assertThat(json.has("id")).isTrue();
     }
 
-    @And("the response should contain missing fields")
-    public void theResponseShouldContainMissingFields() throws Exception {
-        JsonNode json = objectMapper.readTree(response.getBody());
+    @And("the response should contain missing fields of RegisterRequestDTO")
+    public void theResponseShouldContainMissingFieldsOfRegisterRequestDTO() throws Exception {
+        JsonNode json = context.getObjectMapper().readTree(context.getResponse().getBody());
         JsonNode messages = json.get("message");
 
         List<String> expectedMessages = List.of(
@@ -82,9 +101,9 @@ public class RegistrationStepDefinitions {
         assertThat(actualMessages).containsAll(expectedMessages);
     }
 
-    @And("the response should contain fields with invalid format")
-    public void theResponseShouldContainFieldsWithInvalidFormat() throws Exception {
-        JsonNode json = objectMapper.readTree(response.getBody());
+    @And("the response should contain RegisterRequestDTO fields with invalid format")
+    public void theResponseShouldContainRegisterRequestDTOFieldsWithInvalidFormat() throws Exception {
+        JsonNode json = context.getObjectMapper().readTree(context.getResponse().getBody());
         JsonNode messages = json.get("message");
 
         List<String> expectedMessages = List.of(
@@ -104,11 +123,6 @@ public class RegistrationStepDefinitions {
 
     @When("I register via POST {string}")
     public void iRegisterViaPOSTAuthRegister(String endpoint) {
-        response = restTemplate.postForEntity(endpoint, request, String.class);
-    }
-
-    @Then("the response status should be {int}")
-    public void theResponseStatusShouldBe(int status) {
-        assertThat(response.getStatusCode().value()).isEqualTo(status);
+        context.setResponse(restTemplate.postForEntity(endpoint, request, String.class));
     }
 }
