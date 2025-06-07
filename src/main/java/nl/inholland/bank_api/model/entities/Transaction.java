@@ -30,6 +30,10 @@ public class Transaction {
     @JoinColumn()
     private Account targetAccount;
 
+    @ManyToOne
+    @JoinColumn(name = "initiated_by", nullable = false)
+    private User initiatedBy;
+
     @Column(nullable = false)
     private BigDecimal amount;
 

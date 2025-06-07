@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import nl.inholland.bank_api.model.dto.CombinedTransactionDTO;
 import nl.inholland.bank_api.model.dto.TransactionFilterDTO;
 import nl.inholland.bank_api.model.dto.TransactionRequestDTO;
+import nl.inholland.bank_api.model.dto.TransactionResponseDTO;
 import nl.inholland.bank_api.model.entities.User;
 import nl.inholland.bank_api.model.enums.UserRole;
 import nl.inholland.bank_api.service.AccountService;
@@ -40,6 +41,12 @@ public class TransactionController {
     public ResponseEntity<?> postTransaction(@Valid @RequestBody TransactionRequestDTO dto) {
         Long id = transactionService.postTransaction(dto);
         return ResponseEntity.status(201).body(Collections.singletonMap("id", id));
+    }
+
+    @GetMapping("/transactions")
+    public ResponseEntity<List<TransactionResponseDTO>> getAllTransactions() {
+        List<TransactionResponseDTO> transactions = transactionService.getAllTransactions();
+        return ResponseEntity.status(200).body(transactions);
     }
 
     @GetMapping("/accounts/{accountId}/transactions")

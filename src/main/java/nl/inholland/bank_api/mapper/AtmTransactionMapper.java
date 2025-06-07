@@ -1,5 +1,6 @@
 package nl.inholland.bank_api.mapper;
 
+import nl.inholland.bank_api.model.dto.AtmHistoryTransactionDTO;
 import nl.inholland.bank_api.model.dto.AtmTransactionDTO;
 import nl.inholland.bank_api.model.dto.AtmTransactionRequestDTO;
 import nl.inholland.bank_api.model.dto.CombinedTransactionDTO;
@@ -32,6 +33,16 @@ public class AtmTransactionMapper {
                 entity.getTimestamp(),
                 entity.getStatus().name(),
                 entity.getFailureReason()
+        );
+    }
+
+    public AtmHistoryTransactionDTO toAtmHistoryTransactionDTO(AtmTransaction entity) {
+        return new AtmHistoryTransactionDTO(
+                entity.getAccount().getIban(),
+                entity.getInitiatedBy().getFirstName() + " " + entity.getInitiatedBy().getLastName(),
+                entity.getType(),
+                entity.getAmount(),
+                entity.getTimestamp()
         );
     }
 
