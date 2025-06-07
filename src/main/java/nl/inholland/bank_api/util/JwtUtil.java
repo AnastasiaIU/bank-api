@@ -13,6 +13,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+import nl.inholland.bank_api.constant.ErrorMessages;
 import java.io.IOException;
 import java.security.Key;
 import java.security.PublicKey;
@@ -64,10 +65,10 @@ public class JwtUtil {
 
     public void sendJwtErrorResponse(HttpServletResponse response, JwtException e) throws IOException {
         String message = switch (e.getClass().getSimpleName()) {
-            case "ExpiredJwtException" -> "Expired Token";
-            case "MalformedJwtException" -> "Malformed token";
-            case "SignatureException" -> "Invalid token signature";
-            case "UnsupportedJwtException" -> "Unsupported token";
+            case "ExpiredJwtException" -> ErrorMessages.EXPIRED_TOKEN;
+            case "MalformedJwtException" -> ErrorMessages.MALFORMED_TOKEN;
+            case "SignatureException" -> ErrorMessages.INVALID_TOKEN_SIGNATURE;
+            case "UnsupportedJwtException" -> ErrorMessages.UNSUPPORTED_TOKEN;
             default -> e.getMessage();
         };
 

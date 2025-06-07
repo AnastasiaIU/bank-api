@@ -78,6 +78,10 @@ public class CommonStepDefinitions {
             case "MISSING_TOKEN_OR_AUTHORIZATION_HEADER" -> ErrorMessages.MISSING_TOKEN_OR_AUTHORIZATION_HEADER;
             case "ACCOUNT_NOT_FOUND" -> ErrorMessages.ACCOUNT_NOT_FOUND;
             case "ACCESS_DENIED" -> ErrorMessages.ACCESS_DENIED;
+            case "EXPIRED_TOKEN" -> ErrorMessages.EXPIRED_TOKEN;
+            case "MALFORMED_TOKEN" -> ErrorMessages.MALFORMED_TOKEN;
+            case "INVALID_TOKEN_SIGNATURE" -> ErrorMessages.INVALID_TOKEN_SIGNATURE;
+            case "UNSUPPORTED_TOKEN" -> ErrorMessages.UNSUPPORTED_TOKEN;
             default -> throw new IllegalArgumentException(ErrorMessages.UNKNOWN_ERROR_KEY);
         };
     }

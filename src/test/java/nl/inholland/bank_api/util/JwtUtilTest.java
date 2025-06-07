@@ -13,6 +13,7 @@ import io.jsonwebtoken.UnsupportedJwtException;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
+
 import java.util.stream.Stream;
 import static org.mockito.Mockito.*;
 import java.io.PrintWriter;
@@ -20,6 +21,7 @@ import java.io.StringWriter;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import static org.junit.jupiter.api.Assertions.*;
+import nl.inholland.bank_api.constant.ErrorMessages;
 
 class JwtUtilTest {
     @Mock
@@ -81,10 +83,10 @@ class JwtUtilTest {
 
     static Stream<JwtException> jwtExceptionProvider() {
         return Stream.of(
-                new ExpiredJwtException(null, null, "Token expired"),
-                new MalformedJwtException("Malformed token"),
-                new SignatureException("Invalid token signature"),
-                new UnsupportedJwtException("Unsupported token")
+                new ExpiredJwtException(null, null, ErrorMessages.EXPIRED_TOKEN),
+                new MalformedJwtException(ErrorMessages.MALFORMED_TOKEN),
+                new SignatureException(ErrorMessages.INVALID_TOKEN_SIGNATURE),
+                new UnsupportedJwtException(ErrorMessages.UNSUPPORTED_TOKEN)
         );
     }
 
@@ -112,10 +114,10 @@ class JwtUtilTest {
 
         // Check the specific message based on exception type
         String expectedMessage = switch (exception.getClass().getSimpleName()) {
-            case "ExpiredJwtException" -> "Expired Token";
-            case "MalformedJwtException" -> "Malformed token";
-            case "SignatureException" -> "Invalid token signature";
-            case "UnsupportedJwtException" -> "Unsupported token";
+            case "ExpiredJwtException" -> ErrorMessages.EXPIRED_TOKEN;
+            case "MalformedJwtException" -> ErrorMessages.MALFORMED_TOKEN;
+            case "SignatureException" -> ErrorMessages.INVALID_TOKEN_SIGNATURE;
+            case "UnsupportedJwtException" -> ErrorMessages.UNSUPPORTED_TOKEN;
             default -> exception.getMessage();
         };
 

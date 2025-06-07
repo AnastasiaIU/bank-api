@@ -35,5 +35,10 @@ public class ErrorMessages {
     public static final String DAILY_WITHDRAWAL_LIMIT_EXCEEDED = "Daily withdrawal limit exceeded";
     public static final String REQUEST_PAYLOAD_TOO_LARGE = "Request payload too large";
     public static final String MISSING_TOKEN_OR_AUTHORIZATION_HEADER = "Missing token or Authorization header";
+    public static final String EXPIRED_TOKEN = "Expired Token";
+    public static final String MALFORMED_TOKEN = "Malformed Token";
+    public static final String INVALID_TOKEN_SIGNATURE = "Invalid token signature";
+    public static final String UNSUPPORTED_TOKEN = "Unsupported token";
+
     public static final String UNKNOWN_ERROR_KEY = "Unknown error key";
 }
