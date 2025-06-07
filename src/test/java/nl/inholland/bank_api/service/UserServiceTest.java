@@ -3,8 +3,11 @@ package nl.inholland.bank_api.service;
 import nl.inholland.bank_api.constant.ErrorMessages;
 import nl.inholland.bank_api.constant.FieldNames;
 import nl.inholland.bank_api.mapper.UserMapper;
+import nl.inholland.bank_api.model.dto.LoginResponseDTO;
 import nl.inholland.bank_api.model.dto.RegisterRequestDTO;
+import nl.inholland.bank_api.model.dto.LoginRequestDTO;
 import nl.inholland.bank_api.model.entities.User;
+import nl.inholland.bank_api.model.enums.UserRole;
 import nl.inholland.bank_api.repository.UserRepository;
 import nl.inholland.bank_api.util.JwtUtil;
 import nl.inholland.bank_api.util.StringUtils;
@@ -12,9 +15,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -121,4 +127,65 @@ class UserServiceTest {
         verify(userMapper).toEntity(request, passwordEncoder);
         verify(userRepository).save(mapped);
     }
+
+    @Test
+    void loginReturnsTokenWhenCredentialsAreCorrect() {
+        LoginRequestDTO request = new LoginRequestDTO();
+        request.email = "jane.doe@example.com";
+        request.password = "Password123!";
+
+        User user = User.builder()
+                .id(1L)
+                .email("jane.doe@example.com")
+                .password("encodedPassword")
+                .role(UserRole.CUSTOMER)
+                .build();
+
+        when(userRepository.findByEmail(request.email)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches(request.password, user.getPassword())).thenReturn(true);
+        when(jwtUtil.generateToken(user.getEmail(), user.getRole(), user.getId())).thenReturn("mocked-jwt-token");
+
+        LoginResponseDTO response = userService.login(request);
+
+        assertEquals("mocked-jwt-token", response.token());
+        verify(userRepository).findByEmail(request.email);
+        verify(passwordEncoder).matches(request.password, user.getPassword());
+        verify(jwtUtil).generateToken(user.getEmail(), user.getRole(), user.getId());
+    }
+
+    @Test
+    void loginThrowsWhenEmailNotFound() {
+        LoginRequestDTO request = new LoginRequestDTO();
+        request.email = "wrong@example.com";
+        request.password = "Password123!";
+        when(userRepository.findByEmail(request.email)).thenReturn(Optional.empty());
+
+        assertThrows(BadCredentialsException.class, () -> userService.login(request));
+        verify(userRepository).findByEmail(request.email);
+        verify(passwordEncoder, never()).matches(any(), any());
+        verify(jwtUtil, never()).generateToken(any(), any(), any());
+    }
+
+    @Test
+    void loginThrowsWhenPasswordDoesNotMatch() {
+        LoginRequestDTO request = new LoginRequestDTO();
+        request.email = "jane.doe@example.com";
+        request.password = "Wrong123!";
+
+        User user = User.builder()
+                .id(1L)
+                .email("jane.doe@example.com")
+                .password("encodedPassword")
+                .role(UserRole.CUSTOMER)
+                .build();
+
+        when(userRepository.findByEmail(request.email)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches(request.password, user.getPassword())).thenReturn(false);
+
+        assertThrows(BadCredentialsException.class, () -> userService.login(request));
+        verify(userRepository).findByEmail(request.email);
+        verify(passwordEncoder).matches(request.password, user.getPassword());
+        verify(jwtUtil, never()).generateToken(any(), any(), any());
+    }
+
 }
