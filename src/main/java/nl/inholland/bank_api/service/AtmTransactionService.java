@@ -30,8 +30,7 @@ public class AtmTransactionService {
     public AtmTransactionService(
             AtmTransactionRepository atmTransactionRepository,
             AccountRepository accountRepository,
-            AtmTransactionMapper atmTransactionMapper,
-            SecurityService securityService) {
+            AtmTransactionMapper atmTransactionMapper) {
         this.transactionRepository = atmTransactionRepository;
         this.accountRepository = accountRepository;
         this.transactionMapper = atmTransactionMapper;
