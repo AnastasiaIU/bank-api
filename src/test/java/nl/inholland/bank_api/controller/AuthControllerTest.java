@@ -3,6 +3,7 @@ package nl.inholland.bank_api.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.inholland.bank_api.constant.ErrorMessages;
 import nl.inholland.bank_api.constant.FieldNames;
+import nl.inholland.bank_api.exception.ConflictException;
 import nl.inholland.bank_api.exception.GlobalExceptionHandler;
 import nl.inholland.bank_api.model.dto.LoginRequestDTO;
 import nl.inholland.bank_api.model.dto.LoginResponseDTO;
@@ -82,7 +83,7 @@ class AuthControllerTest {
 
     @Test
     void registerValidationErrorsReturn400ForEmptyDtoFields() throws Exception {
-        RegisterRequestDTO request = getValidRegisterRequest();
+        RegisterRequestDTO request = new RegisterRequestDTO();
 
         // Perform the mock POST request to register a new user with missing firstName
         mockMvc.perform(post("/auth/register")
@@ -104,7 +105,7 @@ class AuthControllerTest {
 
     @Test
     void registerValidationErrorsReturn400ForInvalidDtoFields() throws Exception {
-        RegisterRequestDTO request = getValidRegisterRequest();
+        RegisterRequestDTO request = new RegisterRequestDTO();
         request.email = "invalid-email"; // Invalid email format
         request.bsn = "1230"; // Invalid BSN (not 9 digits)
         request.phoneNumber = "12345"; // Invalid phone number (too short)
@@ -125,12 +126,12 @@ class AuthControllerTest {
     }
 
     @Test
-    void registerReturns400WhenServiceThrowsException() throws Exception {
+    void registerReturns409WhenServiceThrowsException() throws Exception {
         RegisterRequestDTO request = getValidRegisterRequest();
 
-        // Mock the userService to throw an IllegalArgumentException when createUser is called
+        // Mock the userService to throw a ConflictException when createUser is called
         when(userService.createUser(any(RegisterRequestDTO.class)))
-                .thenThrow(new IllegalArgumentException(
+                .thenThrow(new ConflictException(
                         StringUtils.fieldError(FieldNames.EMAIL, ErrorMessages.EMAIL_EXISTS)
                 ));
 
@@ -138,7 +139,7 @@ class AuthControllerTest {
         mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.message", hasItem(
                         StringUtils.fieldError(FieldNames.EMAIL, ErrorMessages.EMAIL_EXISTS)
                 )));

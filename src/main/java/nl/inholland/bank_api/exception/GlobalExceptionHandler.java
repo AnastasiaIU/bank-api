@@ -119,4 +119,10 @@ public class GlobalExceptionHandler {
         log.severe(e.getMessage());
         return buildError(HttpStatus.BAD_REQUEST, e, e.getMessage());
     }
+
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<ExceptionDTO> handleConflict(ConflictException e) {
+        log.severe(e.getMessage());
+        return buildError(HttpStatus.CONFLICT, e, e.getMessage());
+    }
 }

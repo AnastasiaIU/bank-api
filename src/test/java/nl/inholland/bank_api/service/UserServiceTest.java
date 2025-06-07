@@ -2,6 +2,7 @@ package nl.inholland.bank_api.service;
 
 import nl.inholland.bank_api.constant.ErrorMessages;
 import nl.inholland.bank_api.constant.FieldNames;
+import nl.inholland.bank_api.exception.ConflictException;
 import nl.inholland.bank_api.mapper.UserMapper;
 import nl.inholland.bank_api.model.dto.LoginResponseDTO;
 import nl.inholland.bank_api.model.dto.RegisterRequestDTO;
@@ -64,9 +65,9 @@ class UserServiceTest {
         // Mock the userRepository to return true when checking for existing email
         when(userRepository.existsByEmail(request.email)).thenReturn(true);
 
-        // Call the createUser method and expect an IllegalArgumentException
-        IllegalArgumentException e = assertThrows(
-                IllegalArgumentException.class, () -> userService.createUser(request)
+        // Call the createUser method and expect a ConflictException
+        ConflictException e = assertThrows(
+                ConflictException.class, () -> userService.createUser(request)
         );
 
         // Verify the exception message and interactions with the repository
@@ -86,9 +87,9 @@ class UserServiceTest {
         // Mock the userRepository to return true for existing BSN
         when(userRepository.existsByBsn(request.bsn)).thenReturn(true);
 
-        // Call the createUser method and expect an IllegalArgumentException
-        IllegalArgumentException e = assertThrows(
-                IllegalArgumentException.class, () -> userService.createUser(request)
+        // Call the createUser method and expect a ConflictException
+        ConflictException e = assertThrows(
+                ConflictException.class, () -> userService.createUser(request)
         );
 
         // Verify the exception message and interactions with the repository

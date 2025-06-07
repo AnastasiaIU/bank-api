@@ -2,6 +2,7 @@ package nl.inholland.bank_api.service;
 
 import nl.inholland.bank_api.constant.ErrorMessages;
 import nl.inholland.bank_api.constant.FieldNames;
+import nl.inholland.bank_api.exception.ConflictException;
 import nl.inholland.bank_api.mapper.UserMapper;
 import nl.inholland.bank_api.model.dto.*;
 import nl.inholland.bank_api.model.entities.User;
@@ -35,11 +36,11 @@ public class UserService {
 
     public Long createUser(RegisterRequestDTO dto) {
         if (userRepository.existsByEmail(dto.email.trim())) {
-            throw new IllegalArgumentException(StringUtils.fieldError(FieldNames.EMAIL, ErrorMessages.EMAIL_EXISTS));
+            throw new ConflictException(StringUtils.fieldError(FieldNames.EMAIL, ErrorMessages.EMAIL_EXISTS));
         }
 
         if (userRepository.existsByBsn(dto.bsn.trim())) {
-            throw new IllegalArgumentException(StringUtils.fieldError(FieldNames.BSN, ErrorMessages.BSN_EXISTS));
+            throw new ConflictException(StringUtils.fieldError(FieldNames.BSN, ErrorMessages.BSN_EXISTS));
         }
 
         User user = userMapper.toEntity(dto, passwordEncoder);

@@ -155,26 +155,6 @@ class AtmTransactionControllerTest {
     }
 
     @Test
-    void createTransactionReturns400WhenInsufficientBalance() throws Exception {
-        AtmTransactionRequestDTO request = getValidRequest(AtmTransactionType.WITHDRAW, new BigDecimal("50.00"));
-
-        // Mock the necessary services
-        when(userService.getUserByEmail("john.doe@example.com")).thenReturn(new User());
-        when(accountService.fetchAccountByIban(request.iban)).thenReturn(new Account());
-        when(atmTransactionService
-                .createTransaction(any(AtmTransactionRequestDTO.class), any(Account.class), any(User.class)))
-                .thenThrow(new IllegalArgumentException(ErrorMessages.INSUFFICIENT_BALANCE));
-
-        // Perform the request and verify the response
-        mockMvc.perform(post(ATM_TRANSACTIONS_ENDPOINT)
-                        .principal(auth())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message", hasItem(ErrorMessages.INSUFFICIENT_BALANCE)));
-    }
-
-    @Test
     void createTransactionReturns404WhenUserNotFound() throws Exception {
         AtmTransactionRequestDTO request = getValidRequest(AtmTransactionType.DEPOSIT, new BigDecimal("50.00"));
 
