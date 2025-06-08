@@ -4,6 +4,7 @@ import nl.inholland.bank_api.mapper.AtmTransactionMapper;
 import nl.inholland.bank_api.mapper.TransactionMapper;
 import nl.inholland.bank_api.model.dto.CombinedTransactionDTO;
 import nl.inholland.bank_api.model.dto.TransactionFilterDTO;
+import nl.inholland.bank_api.model.enums.Status;
 import nl.inholland.bank_api.repository.AtmTransactionRepository;
 import nl.inholland.bank_api.repository.TransactionRepository;
 import org.springframework.data.domain.Page;
@@ -55,7 +56,8 @@ public class CombinedTransactionService {
                 .stream()
                 .map(atmTransactionMapper::toCombinedDTO);
 
-        return Stream.concat(transferStream, atmStream);
+        return Stream.concat(transferStream, atmStream)
+                .sorted((a, b) -> b.timestamp.compareTo(a.timestamp));
     }
 
     private Stream<CombinedTransactionDTO> applyFilters(Stream<CombinedTransactionDTO> stream, TransactionFilterDTO filterDTO) {
@@ -63,7 +65,8 @@ public class CombinedTransactionService {
     }
 
     private boolean matchesFilters(CombinedTransactionDTO dto, TransactionFilterDTO filterDTO) {
-        return matchesDate(dto.timestamp, filterDTO) &&
+        return dto.status == Status.SUCCEEDED &&
+                matchesDate(dto.timestamp, filterDTO) &&
                 matchesAmount(dto.amount, filterDTO) &&
                 matchesIbans(dto.sourceIban, dto.targetIban, filterDTO) &&
                 matchesDescription(dto.description, filterDTO);
