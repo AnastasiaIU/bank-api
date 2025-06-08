@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -124,5 +125,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ExceptionDTO> handleConflict(ConflictException e) {
         log.severe(e.getMessage());
         return buildError(HttpStatus.CONFLICT, e, e.getMessage());
+    }
+
+    @ExceptionHandler(DisabledException.class)
+    public ResponseEntity<ExceptionDTO> handleDisabledException(DisabledException e) {
+        log.severe(e.getMessage());
+        return buildError(HttpStatus.UNAUTHORIZED, e, e.getMessage());
     }
 }

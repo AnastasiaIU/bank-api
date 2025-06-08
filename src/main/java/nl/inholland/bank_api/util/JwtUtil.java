@@ -13,6 +13,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+import nl.inholland.bank_api.constant.ErrorMessages;
 import java.io.IOException;
 import java.security.Key;
 import java.security.PublicKey;
@@ -64,10 +65,10 @@ public class JwtUtil {
 
     public void sendJwtErrorResponse(HttpServletResponse response, JwtException e) throws IOException {
         String message = switch (e.getClass().getSimpleName()) {
-            case "ExpiredJwtException" -> "Expired Token";
-            case "MalformedJwtException" -> "Malformed token";
-            case "SignatureException" -> "Invalid token signature";
-            case "UnsupportedJwtException" -> "Unsupported token";
+            case "ExpiredJwtException" -> ErrorMessages.EXPIRED_TOKEN;
+            case "MalformedJwtException" -> ErrorMessages.MALFORMED_TOKEN;
+            case "SignatureException" -> ErrorMessages.INVALID_TOKEN_SIGNATURE;
+            case "UnsupportedJwtException" -> ErrorMessages.UNSUPPORTED_TOKEN;
             default -> e.getMessage();
         };
 
@@ -81,4 +82,22 @@ public class JwtUtil {
         response.setContentType("application/json");
         new ObjectMapper().writeValue(response.getWriter(), dto);
     }
+
+    // only added for functional tests to test expired token scenario
+    public String generateExpiredToken(String email, UserRole role, Long userId) {
+        Date now = new Date();
+        // Expiration set to 1 hour ago (expired)
+        Date expiredDate = new Date(now.getTime() - 3600000);
+        Key privateKey = keyProvider.getPrivateKey();
+
+        return Jwts.builder()
+                .setSubject(email)
+                .claim("auth", role.name())
+                .claim("userId", userId)
+                .setIssuedAt(new Date(now.getTime() - 7200000)) // issued 2 hours ago
+                .setExpiration(expiredDate)                    // expired 1 hour ago
+                .signWith(privateKey)
+                .compact();
+    }
+
 }

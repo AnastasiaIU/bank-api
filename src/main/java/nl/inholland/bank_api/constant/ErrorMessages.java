@@ -13,6 +13,7 @@ public class ErrorMessages {
     public static final String PHONE_REQUIRED = "Phone number is required";
     public static final String TRANSACTION_TYPE_REQUIRED = "Transaction type is required";
     public static final String AMOUNT_REQUIRED = "Amount is required";
+    public static final String INVALID_EMAIL_OR_PASSWORD = "Invalid email or password";
 
     public static final String INVALID_EMAIL_FORMAT = "Invalid email format";
     public static final String INVALID_BSN_FORMAT = "BSN must be exactly 9 digits";
@@ -34,5 +35,10 @@ public class ErrorMessages {
     public static final String DAILY_WITHDRAWAL_LIMIT_EXCEEDED = "Daily withdrawal limit exceeded";
     public static final String REQUEST_PAYLOAD_TOO_LARGE = "Request payload too large";
     public static final String MISSING_TOKEN_OR_AUTHORIZATION_HEADER = "Missing token or Authorization header";
+    public static final String EXPIRED_TOKEN = "Expired Token";
+    public static final String MALFORMED_TOKEN = "Malformed Token";
+    public static final String INVALID_TOKEN_SIGNATURE = "Invalid token signature";
+    public static final String UNSUPPORTED_TOKEN = "Unsupported token";
+
     public static final String UNKNOWN_ERROR_KEY = "Unknown error key";
 }
