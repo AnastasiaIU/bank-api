@@ -12,6 +12,7 @@ import nl.inholland.bank_api.repository.UserRepository;
 import nl.inholland.bank_api.util.JwtUtil;
 import nl.inholland.bank_api.util.StringUtils;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -54,6 +55,11 @@ public class UserService {
 
         if (!passwordEncoder.matches(loginRequest.password, user.getPassword())) {
             throw new BadCredentialsException(ErrorMessages.INVALID_EMAIL_OR_PASSWORD);
+        }
+
+        if (user.getIsApproved() == UserAccountStatus.CLOSED   // ★
+                || user.getIsApproved() == UserAccountStatus.REJECTED) {
+            throw new DisabledException("Unable to login, account is closed or rejected");
         }
 
         String token = jwtUtil.generateToken(user.getEmail(), user.getRole(), user.getId());

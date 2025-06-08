@@ -2,10 +2,12 @@ package nl.inholland.bank_api.service;
 
 import nl.inholland.bank_api.repository.UserRepository;
 import nl.inholland.bank_api.model.entities.User;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import nl.inholland.bank_api.model.enums.UserAccountStatus;
 
 import java.util.List;
 
@@ -23,6 +25,11 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+
+        if (user.getIsApproved() == UserAccountStatus.CLOSED   // ★
+                || user.getIsApproved() == UserAccountStatus.REJECTED) {
+            throw new DisabledException("Unable to login, account is closed or rejected");
+        }
 
         // Return a UserDetails object (a Spring Security User object)
         return new org.springframework.security.core.userdetails.User(
