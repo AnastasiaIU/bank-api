@@ -1,6 +1,7 @@
 package nl.inholland.bank_api.controller;
 
 import jakarta.validation.Valid;
+import nl.inholland.bank_api.constant.ErrorMessages;
 import nl.inholland.bank_api.model.dto.CombinedTransactionDTO;
 import nl.inholland.bank_api.model.dto.TransactionFilterDTO;
 import nl.inholland.bank_api.model.dto.TransactionRequestDTO;
@@ -59,7 +60,7 @@ public class TransactionController {
         boolean ownsAccount = accountService.ownsAccount(currentUser.getId(), accountId);
 
         if (!ownsAccount && !isEmployee) {
-            throw new AccessDeniedException("You are not authorized to view these transactions.");
+            throw new AccessDeniedException(ErrorMessages.ACCESS_DENIED);
         }
         Page<CombinedTransactionDTO> transactions = combinedTransactionService.getFilteredTransactions(
                 accountId, transactionFilterDTO, pageable);
