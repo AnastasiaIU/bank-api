@@ -1,8 +1,15 @@
 package nl.inholland.bank_api.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import nl.inholland.bank_api.constant.ErrorMessages;
 import nl.inholland.bank_api.model.dto.CombinedTransactionDTO;
+import nl.inholland.bank_api.model.dto.ExceptionDTO;
 import nl.inholland.bank_api.model.dto.TransactionFilterDTO;
 import nl.inholland.bank_api.model.dto.TransactionRequestDTO;
 import nl.inholland.bank_api.model.entities.User;
@@ -42,6 +49,53 @@ public class TransactionController {
         return ResponseEntity.status(201).body(Collections.singletonMap("id", id));
     }
 
+    @Operation(
+            summary = "Get all combined transactions (ATM + Transfers) for a specific account",
+            description = """
+        This endpoint retrieves a paginated and filtered list of all transactions 
+        (ATM and transfer transactions) associated with the given account ID.
+
+        The authenticated user must either:
+        - Own the account, or
+        - Have an EMPLOYEE role.
+
+        Filters can be applied via query parameters:
+        • startDate / endDate (yyyy-MM-dd)  
+        • amount + comparison (lt / eq / gt)  
+        • sourceIban / targetIban  
+        • description (partial match)
+
+        Pagination and sorting are also supported using standard Pageable parameters.
+    """
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Filtered list of combined transactions returned successfully",
+                    content = @Content(
+                            mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(implementation = CombinedTransactionDTO.class))
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized – JWT token is missing or invalid",
+                    content = @Content(schema = @Schema(hidden = true))
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Forbidden – You do not have access to this account",
+                    content = @Content(schema = @Schema(hidden = true))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Account not found",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionDTO.class)
+                    )
+            )
+    })
     @GetMapping("/accounts/{accountId}/transactions")
     public ResponseEntity<Page<CombinedTransactionDTO>> getAllAccountTransactions(
             @PathVariable Long accountId, @ModelAttribute TransactionFilterDTO transactionFilterDTO, @ParameterObject Pageable pageable, Authentication authentication)
