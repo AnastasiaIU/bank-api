@@ -1,7 +1,6 @@
 package nl.inholland.bank_api.functional.steps;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cucumber.java.en.*;
 import nl.inholland.bank_api.constant.ErrorMessages;
 import nl.inholland.bank_api.constant.FieldNames;
@@ -10,11 +9,8 @@ import nl.inholland.bank_api.model.dto.LoginRequestDTO;
 import nl.inholland.bank_api.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.http.ResponseEntity;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class LoginStepDefinitions {

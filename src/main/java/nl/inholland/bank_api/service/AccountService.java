@@ -99,7 +99,7 @@ public class AccountService {
 
     public void updateAccountLimits(String iban, UpdateAccountLimitsDTO dto) {
         Account account = accountRepository.findByIban(iban)
-                .orElseThrow(() -> new EntityNotFoundException("Account not found with iban: " + iban));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorMessages.ACCOUNT_NOT_FOUND));
 
         account.setDailyLimit(dto.getDailyLimit());
         account.setAbsoluteLimit(dto.getAbsoluteLimit());

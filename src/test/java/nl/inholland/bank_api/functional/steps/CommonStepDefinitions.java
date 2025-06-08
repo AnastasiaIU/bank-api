@@ -4,17 +4,20 @@ import com.fasterxml.jackson.databind.JsonNode;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
 import nl.inholland.bank_api.constant.ErrorMessages;
 import nl.inholland.bank_api.constant.FieldNames;
 import nl.inholland.bank_api.functional.TestContext;
 import nl.inholland.bank_api.model.dto.LoginRequestDTO;
 import nl.inholland.bank_api.model.dto.LoginResponseDTO;
+import nl.inholland.bank_api.model.enums.UserRole;
 import nl.inholland.bank_api.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -85,4 +88,33 @@ public class CommonStepDefinitions {
             default -> throw new IllegalArgumentException(ErrorMessages.UNKNOWN_ERROR_KEY);
         };
     }
+
+    @When("I send a GET request to {string}")
+    public void iSendAGetRequest(String endpoint) {
+        HttpEntity<Void> request = new HttpEntity<>(context.getHeaders());
+        ResponseEntity<String> response = restTemplate.exchange(endpoint, HttpMethod.GET, request, String.class);
+        context.setResponse(response);
+    }
+
+    @Given("I am logged in as {word}")
+    public void iAmLoggedInAsRole(String roleStr) {
+        UserRole role = UserRole.valueOf(roleStr.toUpperCase());
+        String email;
+        String password;
+
+        switch (role) {
+            case EMPLOYEE -> {
+                email = "admin@mail.com";
+                password = "admin";
+            }
+            case CUSTOMER -> {
+                email = "123@mail.com";
+                password = "123";
+            }
+            default -> throw new IllegalArgumentException("Unsupported role: " + role);
+        }
+
+        iAmLoggedInWithEmailAndPassword(email, password);
+    }
+
 }

@@ -2,7 +2,6 @@ package nl.inholland.bank_api.service;
 import nl.inholland.bank_api.model.entities.User;
 import nl.inholland.bank_api.model.enums.UserRole;
 import nl.inholland.bank_api.repository.UserRepository;
-import nl.inholland.bank_api.service.CustomUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -11,9 +10,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-
 import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 

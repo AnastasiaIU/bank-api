@@ -10,4 +10,6 @@ public class FieldNames {
     public static final String PHONE_NUMBER = "phoneNumber";
     public static final String AMOUNT = "amount";
     public static final String TYPE = "type";
+    public static final String DAILY_LIMIT = "dailyLimit";
+    public static final String WITHDRAW_LIMIT = "withdrawLimit";
 }
