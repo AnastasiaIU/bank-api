@@ -1,11 +1,13 @@
 package nl.inholland.bank_api.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import nl.inholland.bank_api.constant.ErrorMessages;
 import nl.inholland.bank_api.model.dto.CombinedTransactionDTO;
 import nl.inholland.bank_api.model.dto.CombinedTransactionFullHistoryDTO;
@@ -20,6 +22,11 @@ import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
@@ -40,8 +47,139 @@ public class CombinedTransactionController {
         this.accountService = accountService;
     }
 
+    @Operation(
+            summary = "Get all transactions (EMPLOYEE only)",
+            description = "Retrieve a paginated list of all ATM and transfer transactions in the system. Only users with the EMPLOYEE role can access this endpoint."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Transactions retrieved successfully",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = CombinedTransactionFullHistoryDTO.class),
+                            examples = @ExampleObject(
+                                    name = "Paginated Combined Transactions",
+                                    summary = "A page of combined transactions",
+                                    value = """
+                {
+                  "content": [
+                    {
+                      "sourceIban": "NL91ABNA0417164300",
+                      "targetIban": "NL91ABNA0417164301",
+                      "initiatedBy": 1,
+                      "amount": 250.00,
+                      "timestamp": "2025-06-09T14:20:00",
+                      "type": "TRANSFER",
+                      "status": "SUCCEEDED"
+                    },
+                    {
+                      "sourceIban": "NL91ABNA0417164300",
+                      "targetIban": null,
+                      "initiatedBy": 1,
+                      "amount": 100.00,
+                      "timestamp": "2025-06-09T13:10:00",
+                      "type": "WITHDRAWAL",
+                      "status": "SUCCEEDED"
+                    }
+                  ],
+                  "pageable": {
+                    "pageNumber": 0,
+                    "pageSize": 10,
+                    "offset": 0,
+                    "paged": true,
+                    "unpaged": false
+                  },
+                  "totalPages": 1,
+                  "totalElements": 2,
+                  "last": true,
+                  "size": 10,
+                  "number": 0,
+                  "sort": {
+                    "sorted": false,
+                    "unsorted": true,
+                    "empty": true
+                  },
+                  "first": true,
+                  "numberOfElements": 2,
+                  "empty": false
+                }
+                """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Forbidden – Only employees may access this endpoint",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionDTO.class),
+                            examples = @ExampleObject(
+                                    name = "Access Denied",
+                                    summary = "Non-employee attempted to access",
+                                    value = """
+                {
+                  "status": 403,
+                  "exception": "AuthorizationDeniedException",
+                  "message": ["Access denied"]
+                }
+                """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized – JWT token is missing, invalid, expired, or malformed",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionDTO.class),
+                            examples = {
+                                    @ExampleObject(
+                                            name = "Expired Token",
+                                            summary = "JWT token is expired",
+                                            value = """
+                    {
+                      "status": 401,
+                      "exception": "ExpiredJwtException",
+                      "message": ["Expired Token"]
+                    }
+                    """
+                                    ),
+                                    @ExampleObject(
+                                            name = "Missing Token",
+                                            summary = "JWT token or Authorization header is missing",
+                                            value = """
+                    {
+                      "status": 401,
+                      "exception": "JwtException",
+                      "message": ["Missing token or Authorization header"]
+                    }
+                    """
+                                    ),
+                                    @ExampleObject(
+                                            name = "Malformed Token",
+                                            summary = "JWT token is malformed",
+                                            value = """
+                    {
+                      "status": 401,
+                      "exception": "MalformedJwtException",
+                      "message": ["Malformed token"]
+                    }
+                    """
+                                    )
+                            }
+                    )
+            )
+    })
+    @PreAuthorize("hasRole('EMPLOYEE')")
     @GetMapping("combined-transactions")
-    public Page<CombinedTransactionFullHistoryDTO> getAllCombinedTransactions(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
+    public Page<CombinedTransactionFullHistoryDTO> getAllCombinedTransactions(
+            @Parameter(description = "Page number (zero-based)", example = "0")
+            @RequestParam(defaultValue = "0") int page,
+
+            @Parameter(description = "Number of transactions per page", example = "10")
+            @RequestParam(defaultValue = "10") int size
+    ) {
         Pageable pageable = PageRequest.of(page, size);
         return combinedTransactionService.getAllCombinedTransactions(pageable);
     }
