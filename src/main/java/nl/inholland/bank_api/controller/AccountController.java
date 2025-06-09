@@ -1,6 +1,7 @@
 package nl.inholland.bank_api.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -33,7 +34,16 @@ public class AccountController {
     }
 
     @GetMapping("/accounts/{iban}")
-    public ResponseEntity<AccountDTO> fetchAccountByIban(@PathVariable String iban) {
+    @Operation(
+            summary = "Fetch account by IBAN",
+            description = "Retrieve a specific bank account's details using its IBAN."
+    )
+    @ApiResponse(responseCode = "200", description = "Account found successfully")
+    @ApiResponse(responseCode = "404", description = "Account with the given IBAN was not found")
+    public ResponseEntity<AccountDTO> fetchAccountByIban(
+            @Parameter(description = "The IBAN of the account to retrieve", required = true)
+            @PathVariable String iban
+    ) {
         AccountDTO account = accountService.fetchAccountDTOByIban(iban);
         return ResponseEntity.ok(account);
     }
