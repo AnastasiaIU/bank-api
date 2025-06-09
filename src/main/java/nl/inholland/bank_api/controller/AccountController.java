@@ -39,6 +39,7 @@ public class AccountController {
             description = "Retrieve a specific bank account's details using its IBAN."
     )
     @ApiResponse(responseCode = "200", description = "Account found successfully")
+    @ApiResponse(responseCode = "401", description = "Unauthorized – JWT token is missing, invalid, expired, or malformed")
     @ApiResponse(responseCode = "404", description = "Account with the given IBAN was not found")
     public ResponseEntity<AccountDTO> fetchAccountByIban(
             @Parameter(description = "The IBAN of the account to retrieve", required = true)
