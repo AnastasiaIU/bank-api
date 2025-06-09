@@ -44,4 +44,33 @@ public class AccountMapperTest {
         assertEquals(user.getFirstName(), dto.getFirstName());
         assertEquals(user.getLastName(), dto.getLastName());
     }
+
+    @Test
+    void toAccountMapsAllFieldsCorrectly() {
+        AccountWithUserDTO dto = new AccountWithUserDTO();
+        dto.setIban("NL12BANK3456789012");
+        dto.setStatus("ACTIVE");
+        dto.setType("CHECKING");
+        dto.setBalance(new BigDecimal("10000"));
+        dto.setDailyLimit(new BigDecimal("800"));
+        dto.setAbsoluteLimit(new BigDecimal("-100"));
+        dto.setWithdrawLimit(new BigDecimal("100"));
+
+        User user = User.builder()
+                .firstName("Jane")
+                .lastName("Smith")
+                .build();
+
+        AccountMapper mapper = new AccountMapper();
+        Account account = mapper.toAccount(dto, user);
+
+        assertEquals(dto.getIban(), account.getIban());
+        assertEquals(AccountStatus.ACTIVE, account.getStatus());
+        assertEquals(AccountType.CHECKING, account.getType());
+        assertEquals(dto.getBalance(), account.getBalance());
+        assertEquals(dto.getDailyLimit(), account.getDailyLimit());
+        assertEquals(dto.getAbsoluteLimit(), account.getAbsoluteLimit());
+        assertEquals(dto.getWithdrawLimit(), account.getWithdrawLimit());
+        assertEquals(user, account.getUser());
+    }
 }

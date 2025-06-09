@@ -11,6 +11,9 @@ import nl.inholland.bank_api.model.entities.User;
 import nl.inholland.bank_api.model.enums.AccountStatus;
 import nl.inholland.bank_api.model.enums.AccountType;
 import nl.inholland.bank_api.model.enums.Operation;
+import nl.inholland.bank_api.model.entities.User;
+import nl.inholland.bank_api.model.enums.AccountStatus;
+import nl.inholland.bank_api.model.enums.AccountType;
 import nl.inholland.bank_api.repository.AccountRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -126,6 +129,89 @@ public class AccountServiceTest {
 
         // Verify that the save method was called on the repository with the updated account
         verify(accountRepository).save(account);
+    }
+
+    @Test
+    void fetchAccountsByUserId_ReturnsMappedDTOs() {
+        Long userId = 1L;
+        Account account1 = new Account();
+        Account account2 = new Account();
+        account1.setId(1L);
+        account1.setIban("NL01INHO...");
+        account1.setStatus(AccountStatus.ACTIVE);
+        account1.setType(AccountType.CHECKING);
+        account1.setBalance(BigDecimal.TEN);
+
+        account2.setId(2L);
+        account2.setIban("NL02INHO...");
+        account2.setStatus(AccountStatus.ACTIVE);
+        account2.setType(AccountType.CHECKING);
+        account2.setBalance(BigDecimal.TEN);
+
+        when(accountRepository.findByUserId(userId)).thenReturn(List.of(account1, account2));
+
+        List<AccountDTO> result = accountService.fetchAccountsByUserId(userId);
+
+        assertEquals(2, result.size());
+        assertEquals("NL01INHO...", result.get(0).getIban());
+        assertEquals("NL02INHO...", result.get(1).getIban());
+    }
+
+    @Test
+    void createAccountsByUserId_CreatesAndReturnsTwoAccounts() {
+        Long userId = 1L;
+        when(accountRepository.existsByIban(anyString())).thenReturn(false);
+        when(mapper.toAccountWithUserDTO(any(Account.class))).thenReturn(new AccountWithUserDTO());
+
+        List<AccountWithUserDTO> result = accountService.createAccountsByUserId(userId);
+
+        assertEquals(2, result.size());
+        verify(mapper, times(2)).toAccountWithUserDTO(any(Account.class));
+    }
+
+    @Test
+    void saveAccounts_SavesMappedAccounts() {
+        User user = new User();
+        AccountWithUserDTO dto = new AccountWithUserDTO();
+        Account account = new Account();
+
+        when(mapper.toAccount(dto, user)).thenReturn(account);
+
+        accountService.saveAccounts(user, List.of(dto));
+
+        verify(mapper).toAccount(dto, user);
+        verify(accountRepository).saveAll(anyList());
+    }
+
+    @Test
+    void closeAccountByIban_ClosesAccount() {
+        String iban = "NL123BANK1234567890";
+        Account account = new Account();
+        account.setStatus(AccountStatus.ACTIVE);
+
+        when(accountRepository.findByIban(iban)).thenReturn(Optional.of(account));
+
+        accountService.closeAccountByIban(iban);
+
+        assertEquals(AccountStatus.CLOSED, account.getStatus());
+        verify(accountRepository).save(account);
+    }
+
+    @Test
+    void closeAllAccountsForUser_ClosesAllAccounts() {
+        Long userId = 1L;
+        Account a1 = new Account();
+        Account a2 = new Account();
+        a1.setStatus(AccountStatus.ACTIVE);
+        a2.setStatus(AccountStatus.ACTIVE);
+
+        when(accountRepository.findByUserId(userId)).thenReturn(List.of(a1, a2));
+
+        accountService.closeAllAccountsForUser(userId);
+
+        assertEquals(AccountStatus.CLOSED, a1.getStatus());
+        assertEquals(AccountStatus.CLOSED, a2.getStatus());
+        verify(accountRepository).saveAll(List.of(a1, a2));
     }
 
     @Test
