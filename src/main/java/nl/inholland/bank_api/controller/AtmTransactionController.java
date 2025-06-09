@@ -6,7 +6,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
-import nl.inholland.bank_api.model.dto.AtmHistoryTransactionDTO;
 import nl.inholland.bank_api.model.dto.AtmTransactionDTO;
 import nl.inholland.bank_api.model.dto.AtmTransactionRequestDTO;
 import nl.inholland.bank_api.model.dto.ExceptionDTO;
@@ -18,8 +17,6 @@ import nl.inholland.bank_api.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("atm")
@@ -144,11 +141,5 @@ public class AtmTransactionController {
     public ResponseEntity<AtmTransactionDTO> getTransaction(@PathVariable Long id) {
         AtmTransactionDTO transaction = atmTransactionService.getTransaction(id);
         return ResponseEntity.ok(transaction);
-    }
-
-    @GetMapping("/transactions")
-    public ResponseEntity<List<AtmHistoryTransactionDTO>> getTransactions() {
-        List<AtmHistoryTransactionDTO> transactions = atmTransactionService.getAllTransactions();
-        return ResponseEntity.ok(transactions);
     }
 }

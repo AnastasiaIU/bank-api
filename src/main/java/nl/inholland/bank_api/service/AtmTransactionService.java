@@ -4,7 +4,6 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import nl.inholland.bank_api.constant.ErrorMessages;
 import nl.inholland.bank_api.mapper.AtmTransactionMapper;
-import nl.inholland.bank_api.model.dto.AtmHistoryTransactionDTO;
 import nl.inholland.bank_api.model.dto.AtmTransactionDTO;
 import nl.inholland.bank_api.model.dto.AtmTransactionRequestDTO;
 import nl.inholland.bank_api.model.entities.Account;
@@ -34,10 +33,6 @@ public class AtmTransactionService {
         this.transactionRepository = atmTransactionRepository;
         this.accountRepository = accountRepository;
         this.transactionMapper = atmTransactionMapper;
-    }
-
-    public List<AtmHistoryTransactionDTO> getAllTransactions() {
-        return transactionRepository.findAll().stream().map(transactionMapper::toAtmHistoryTransactionDTO).toList();
     }
 
     @PreAuthorize("@securityService.isOwnerOfAccount(#dto.iban)")

@@ -19,4 +19,5 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     BigDecimal sumAmountForAccountToday(@Param("accountId") Long accountId,
             @Param("date") LocalDate date);
 
+
 }
