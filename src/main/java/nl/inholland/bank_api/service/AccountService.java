@@ -52,8 +52,8 @@ public class AccountService {
         accountRepository.save(account);
     }
 
-    public List<AccountDTO> fetchAccountsByName(String firstName, String lastName) {
-        List<Account> accounts = accountRepository.findByFirstNameAndLastName(firstName, lastName);
+    public List<AccountDTO> fetchAccountsByName(String firstName, String lastName, Long id) {
+        List<Account> accounts = accountRepository.findByFirstNameAndLastName(firstName, lastName, id);
         return accounts.stream()
                 .filter(account -> AccountType.CHECKING.equals(account.getType()))
                 .map(this::toDTO)

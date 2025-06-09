@@ -66,16 +66,6 @@ public class TransactionMapper {
         return transaction;
     }
 
-    public TransactionResponseDTO toResponseDTO(Transaction transaction) {
-        return new TransactionResponseDTO(transaction.getSourceAccount(),
-                transaction.getTargetAccount(),
-                transaction.getInitiatedBy().getFirstName() + " " + transaction.getInitiatedBy().getLastName(),
-                transaction.getAmount(),
-                transaction.getDescription(),
-                transaction.getStatus(),
-                transaction.getTimestamp());
-    }
-
     private boolean isTransactionSuccessful(Account sourceAccount, Account targetAccount, BigDecimal amount) {
         if (sourceAccount == null || targetAccount == null || sourceAccount == targetAccount) {
             return false;
@@ -95,6 +85,4 @@ public class TransactionMapper {
 
         return true;
     }
-
-
 }

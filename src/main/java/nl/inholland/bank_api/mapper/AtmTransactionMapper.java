@@ -36,16 +36,6 @@ public class AtmTransactionMapper {
         );
     }
 
-    public AtmHistoryTransactionDTO toAtmHistoryTransactionDTO(AtmTransaction entity) {
-        return new AtmHistoryTransactionDTO(
-                entity.getAccount().getIban(),
-                entity.getInitiatedBy().getFirstName() + " " + entity.getInitiatedBy().getLastName(),
-                entity.getType(),
-                entity.getAmount(),
-                entity.getTimestamp()
-        );
-    }
-
     public CombinedTransactionDTO toCombinedDTO(AtmTransaction atm) {
         CombinedTransactionDTO dto = new CombinedTransactionDTO();
         dto.id = atm.getId();

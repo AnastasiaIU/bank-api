@@ -50,9 +50,9 @@ public class AccountController {
         return ResponseEntity.ok(accounts);
     }
 
-    @GetMapping("/users/accounts/{firstName}/{lastName}")
-    public ResponseEntity<List<AccountDTO>> fetchAccountsByName(@PathVariable String firstName, @PathVariable String lastName) {
-        List<AccountDTO> accounts = accountService.fetchAccountsByName(firstName, lastName);
+    @GetMapping("/users/accounts/{firstName}/{lastName}/{id}")
+    public ResponseEntity<List<AccountDTO>> fetchAccountsByName(@PathVariable String firstName, @PathVariable String lastName, @PathVariable Long id) {
+        List<AccountDTO> accounts = accountService.fetchAccountsByName(firstName, lastName, id);
         return ResponseEntity.ok(accounts);
     }
 

@@ -3,10 +3,13 @@ package nl.inholland.bank_api.service;
 import nl.inholland.bank_api.mapper.AtmTransactionMapper;
 import nl.inholland.bank_api.mapper.TransactionMapper;
 import nl.inholland.bank_api.model.dto.CombinedTransactionDTO;
+import nl.inholland.bank_api.model.dto.CombinedTransactionFullHistoryDTO;
 import nl.inholland.bank_api.model.dto.TransactionFilterDTO;
+import nl.inholland.bank_api.model.enums.AtmTransactionType;
 import nl.inholland.bank_api.model.enums.Status;
 import nl.inholland.bank_api.repository.AtmTransactionRepository;
 import nl.inholland.bank_api.repository.TransactionRepository;
+import nl.inholland.bank_api.repository.CombinedTransactionRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -26,12 +29,14 @@ public class CombinedTransactionService {
     private final TransactionRepository transactionRepository;
     private final AtmTransactionMapper atmTransactionMapper;
     private final TransactionMapper transactionMapper;
+    private final CombinedTransactionRepository combinedTransactionRepository;
 
-    public CombinedTransactionService(AtmTransactionRepository atmTransactionRepository, TransactionRepository transactionRepository, AtmTransactionMapper atmTransactionMapper, TransactionMapper transactionMapper){
+    public CombinedTransactionService(AtmTransactionRepository atmTransactionRepository, TransactionRepository transactionRepository, AtmTransactionMapper atmTransactionMapper, TransactionMapper transactionMapper, CombinedTransactionRepository combinedTransactionRepository) {
         this.atmTransactionRepository = atmTransactionRepository;
         this.transactionRepository = transactionRepository;
         this.atmTransactionMapper = atmTransactionMapper;
         this.transactionMapper = transactionMapper;
+        this.combinedTransactionRepository = combinedTransactionRepository;
     }
 
     public Page<CombinedTransactionDTO> getFilteredTransactions(Long accountId, TransactionFilterDTO filterDTO, Pageable pageable) {
@@ -108,5 +113,39 @@ public class CombinedTransactionService {
         if (filter.getTargetIban() != null && !filter.getTargetIban().isBlank() && !filter.getTargetIban().equals(targetIban))
             return false;
         return true;
+    }
+
+    public Page<CombinedTransactionFullHistoryDTO> getAllCombinedTransactions(Pageable pageable) {
+        int size = pageable.getPageSize();
+        int offset = (int) pageable.getOffset();
+
+        List<Object[]> rawResults = combinedTransactionRepository.findAllCombined(size, offset);
+        List<CombinedTransactionFullHistoryDTO> dtos = rawResults.stream()
+                .map(this::mapToCombinedTransactionDTO)
+                .toList();
+
+        long total = combinedTransactionRepository.countAllCombined();
+
+        return new PageImpl<>(dtos, pageable, total);
+    }
+
+    private CombinedTransactionFullHistoryDTO mapToCombinedTransactionDTO(Object[] row) {
+        String sourceIban = (String) row[0];
+        String targetIban = (String) row[1];
+        Long initiatedBy = ((Number) row[2]).longValue();
+        BigDecimal amount = (BigDecimal) row[3];
+        LocalDateTime timestamp = ((java.sql.Timestamp) row[4]).toLocalDateTime();
+        String typeStr = (String) row[5];
+        String statusStr = (String) row[6];
+
+        return new CombinedTransactionFullHistoryDTO(
+                sourceIban,
+                targetIban,
+                initiatedBy,
+                amount,
+                timestamp,
+                typeStr.equals("TRANSFER") ? "TRANSFER" : AtmTransactionType.valueOf(typeStr).toString(),
+                Status.valueOf(statusStr)
+        );
     }
 }
