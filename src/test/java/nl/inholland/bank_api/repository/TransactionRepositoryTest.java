@@ -27,6 +27,7 @@ public class TransactionRepositoryTest {
     @Autowired
     private UserRepository userRepository;
 
+
     @Test
     void sumAmountForAccountTodayReturnsCorrectTotal() {
         // Create and save a user
@@ -55,6 +56,7 @@ public class TransactionRepositoryTest {
         // Succeeded transaction today, amount 100
         repository.save(Transaction.builder()
                 .sourceAccount(account)
+                .initiatedBy(user)
                 .status(Status.SUCCEEDED)
                 .amount(new BigDecimal("100"))
                 .build());
@@ -62,6 +64,7 @@ public class TransactionRepositoryTest {
         // Another succeeded transaction today, amount 50
         repository.save(Transaction.builder()
                 .sourceAccount(account)
+                .initiatedBy(user)
                 .status(Status.SUCCEEDED)
                 .amount(new BigDecimal("50"))
                 .build());
@@ -69,6 +72,7 @@ public class TransactionRepositoryTest {
         // Failed transaction today, amount 30 (should NOT be included)
         repository.save(Transaction.builder()
                 .sourceAccount(account)
+                .initiatedBy(user)
                 .status(Status.FAILED)
                 .amount(new BigDecimal("30"))
                 .build());
@@ -107,6 +111,7 @@ public class TransactionRepositoryTest {
         // Succeeded transaction today, amount 100
         repository.save(Transaction.builder()
                 .sourceAccount(account)
+                .initiatedBy(user)
                 .status(Status.SUCCEEDED)
                 .amount(new BigDecimal("100"))
                 .timestamp(LocalDateTime.now())
@@ -115,6 +120,7 @@ public class TransactionRepositoryTest {
         // Another succeeded transaction today, amount 50
         repository.save(Transaction.builder()
                 .sourceAccount(account)
+                .initiatedBy(user)
                 .status(Status.SUCCEEDED)
                 .amount(new BigDecimal("50"))
                 .timestamp(LocalDateTime.now())
@@ -123,6 +129,7 @@ public class TransactionRepositoryTest {
         // Failed transaction today, amount 30 (should NOT be included)
         repository.save(Transaction.builder()
                 .sourceAccount(account)
+                .initiatedBy(user)
                 .status(Status.FAILED)
                 .amount(new BigDecimal("30"))
                 .timestamp(LocalDateTime.now())
@@ -131,6 +138,7 @@ public class TransactionRepositoryTest {
         // Succeeded transaction on another day (yesterday), amount 200 (should NOT be included)
         repository.save(Transaction.builder()
                 .sourceAccount(account)
+                .initiatedBy(user)
                 .status(Status.SUCCEEDED)
                 .amount(new BigDecimal("200"))
                 .timestamp(LocalDateTime.now().minusDays(1))

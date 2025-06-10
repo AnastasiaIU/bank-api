@@ -8,6 +8,7 @@ import nl.inholland.bank_api.model.dto.LoginResponseDTO;
 import nl.inholland.bank_api.model.dto.RegisterRequestDTO;
 import nl.inholland.bank_api.model.dto.LoginRequestDTO;
 import nl.inholland.bank_api.model.entities.User;
+import nl.inholland.bank_api.model.enums.UserAccountStatus;
 import nl.inholland.bank_api.model.enums.UserRole;
 import nl.inholland.bank_api.repository.UserRepository;
 import nl.inholland.bank_api.util.JwtUtil;
@@ -17,6 +18,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -184,6 +186,29 @@ class UserServiceTest {
         when(passwordEncoder.matches(request.password, user.getPassword())).thenReturn(false);
 
         assertThrows(BadCredentialsException.class, () -> userService.login(request));
+        verify(userRepository).findByEmail(request.email);
+        verify(passwordEncoder).matches(request.password, user.getPassword());
+        verify(jwtUtil, never()).generateToken(any(), any(), any());
+    }
+
+    @Test
+    void loginThrowsWhenUserIsClosedOrRejected() {
+        LoginRequestDTO request = new LoginRequestDTO();
+        request.email = "jane.doe@example.com";
+        request.password = "Password123!";
+
+        User user = User.builder()
+                .id(1L)
+                .email("jane.doe@example.com")
+                .password("encodedPassword")
+                .role(UserRole.CUSTOMER)
+                .isApproved(UserAccountStatus.CLOSED)
+                .build();
+
+        when(userRepository.findByEmail(request.email)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches(request.password, user.getPassword())).thenReturn(true);
+
+        assertThrows(DisabledException.class, () -> userService.login(request));
         verify(userRepository).findByEmail(request.email);
         verify(passwordEncoder).matches(request.password, user.getPassword());
         verify(jwtUtil, never()).generateToken(any(), any(), any());

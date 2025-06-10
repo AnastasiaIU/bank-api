@@ -23,3 +23,9 @@ Feature: Login
     When I login via POST "/auth/login"
     Then the response status should be 401
     And the login response should contain bad credentials error
+
+  Scenario: Login with a closed/rejected user account
+    Given a valid login payload for a closed or rejected user
+    When I login via POST "/auth/login"
+    Then the response status should be 401
+    And the login response should contain closed or rejected error
