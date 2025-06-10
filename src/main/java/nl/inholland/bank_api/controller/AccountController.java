@@ -139,6 +139,125 @@ public class AccountController {
         return ResponseEntity.ok(account);
     }
 
+    @Operation(
+            summary = "Fetch accounts by user ID",
+            description = "Retrieves all accounts associated with the specified user ID."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Accounts retrieved successfully",
+                    content = @Content(
+                            mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(implementation = AccountDTO.class)),
+                            examples = @ExampleObject(
+                                    name = "User Accounts",
+                                    summary = "List of accounts for a user",
+                                    value = """
+                [
+                  {
+                    "iban": "NL91ABNA0417164300",
+                    "type": "CHECKING",
+                    "balance": 1200.50,
+                    "dailyLimit": 5000,
+                    "absoluteLimit": -200,
+                    "withdrawLimit": 3000
+                  },
+                  {
+                    "iban": "NL91ABNA0417164301",
+                    "type": "SAVINGS",
+                    "balance": 8000.00,
+                    "dailyLimit": 3000,
+                    "absoluteLimit": -100,
+                    "withdrawLimit": 1500
+                  }
+                ]
+                """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized – JWT token is missing, invalid, expired, or malformed",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionDTO.class),
+                            examples = {
+                                    @ExampleObject(
+                                            name = "Expired Token",
+                                            summary = "JWT token is expired",
+                                            value = """
+                    {
+                      "status": 401,
+                      "exception": "ExpiredJwtException",
+                      "message": ["Expired Token"]
+                    }
+                    """
+                                    ),
+                                    @ExampleObject(
+                                            name = "Missing Token",
+                                            summary = "JWT token or Authorization header is missing",
+                                            value = """
+                    {
+                      "status": 401,
+                      "exception": "JwtException",
+                      "message": ["Missing token or Authorization header"]
+                    }
+                    """
+                                    ),
+                                    @ExampleObject(
+                                            name = "Malformed Token",
+                                            summary = "JWT token is malformed",
+                                            value = """
+                    {
+                      "status": 401,
+                      "exception": "MalformedJwtException",
+                      "message": ["Malformed token"]
+                    }
+                    """
+                                    )
+                            }
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Forbidden – You do not have access to this resource",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionDTO.class),
+                            examples = @ExampleObject(
+                                    name = "Access Denied",
+                                    summary = "User lacks required authorization",
+                                    value = """
+                {
+                  "status": 403,
+                  "exception": "AuthorizationDeniedException",
+                  "message": ["Access denied"]
+                }
+                """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "User not found",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionDTO.class),
+                            examples = @ExampleObject(
+                                    name = "User Not Found",
+                                    summary = "User not found error",
+                                    value = """
+                {
+                  "status": 404,
+                  "exception": "EntityNotFoundException",
+                  "message": ["User not found with id: 123"]
+                }
+                """
+                            )
+                    )
+            )
+    })
 
     @GetMapping("/users/{userId}/accounts")
     public ResponseEntity<List<AccountDTO>> fetchAccountsByUserId(@PathVariable Long userId) {
@@ -620,16 +739,21 @@ public class AccountController {
     }
 
 
-    @ApiResponse(
-            responseCode = "200",
-            description = "Accounts successfully created",
-            content = @Content(
-                    mediaType = "application/json",
-                    array = @ArraySchema(schema = @Schema(implementation = AccountWithUserDTO.class)),
-                    examples = @ExampleObject(
-                            name = "Accounts Created",
-                            summary = "List of two created accounts",
-                            value = """
+    @Operation(
+            summary = "Create default accounts for a user (EMPLOYEE only)",
+            description = "Creates default accounts for the user with the specified ID. Only accessible by employees."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Accounts successfully created",
+                    content = @Content(
+                            mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(implementation = AccountWithUserDTO.class)),
+                            examples = @ExampleObject(
+                                    name = "Accounts Created",
+                                    summary = "List of two created accounts",
+                                    value = """
             [
               {
                 "iban": "NL91ABNA0417164300",
@@ -653,9 +777,92 @@ public class AccountController {
               }
             ]
             """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized – JWT token is missing, invalid, expired, or malformed",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionDTO.class),
+                            examples = {
+                                    @ExampleObject(
+                                            name = "Expired Token",
+                                            summary = "JWT token is expired",
+                                            value = """
+                    {
+                      "status": 401,
+                      "exception": "ExpiredJwtException",
+                      "message": ["Expired Token"]
+                    }
+                    """
+                                    ),
+                                    @ExampleObject(
+                                            name = "Missing Token",
+                                            summary = "JWT token or Authorization header is missing",
+                                            value = """
+                    {
+                      "status": 401,
+                      "exception": "JwtException",
+                      "message": ["Missing token or Authorization header"]
+                    }
+                    """
+                                    ),
+                                    @ExampleObject(
+                                            name = "Malformed Token",
+                                            summary = "JWT token is malformed",
+                                            value = """
+                    {
+                      "status": 401,
+                      "exception": "MalformedJwtException",
+                      "message": ["Malformed token"]
+                    }
+                    """
+                                    )
+                            }
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Forbidden – You do not have access to this resource",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionDTO.class),
+                            examples = @ExampleObject(
+                                    name = "Access Denied",
+                                    summary = "User lacks required authorization",
+                                    value = """
+                {
+                  "status": 403,
+                  "exception": "AuthorizationDeniedException",
+                  "message": ["Access denied"]
+                }
+                """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "User not found",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionDTO.class),
+                            examples = @ExampleObject(
+                                    name = "User Not Found",
+                                    summary = "User not found error",
+                                    value = """
+                {
+                  "status": 404,
+                  "exception": "EntityNotFoundException",
+                  "message": ["User not found with id: 123"]
+                }
+                """
+                            )
                     )
             )
-    )
+    })
+
     @GetMapping("/users/{id}/accounts/review")
     @PreAuthorize("hasRole('EMPLOYEE')")
     public ResponseEntity<List<AccountWithUserDTO>> createDefaultAccounts(@PathVariable Long id) {
@@ -664,6 +871,97 @@ public class AccountController {
     }
 
 
+    @Operation(
+            summary = "Close an account by IBAN (EMPLOYEE only)",
+            description = "Closes the account identified by the given IBAN. Only accessible by employees with the appropriate role."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "204",
+                    description = "Account successfully closed – No content returned"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized – JWT token is missing, invalid, expired, or malformed",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionDTO.class),
+                            examples = {
+                                    @ExampleObject(
+                                            name = "Expired Token",
+                                            summary = "JWT token is expired",
+                                            value = """
+                    {
+                      "status": 401,
+                      "exception": "ExpiredJwtException",
+                      "message": ["Expired Token"]
+                    }
+                    """
+                                    ),
+                                    @ExampleObject(
+                                            name = "Missing Token",
+                                            summary = "JWT token or Authorization header is missing",
+                                            value = """
+                    {
+                      "status": 401,
+                      "exception": "JwtException",
+                      "message": ["Missing token or Authorization header"]
+                    }
+                    """
+                                    ),
+                                    @ExampleObject(
+                                            name = "Malformed Token",
+                                            summary = "JWT token is malformed",
+                                            value = """
+                    {
+                      "status": 401,
+                      "exception": "MalformedJwtException",
+                      "message": ["Malformed token"]
+                    }
+                    """
+                                    )
+                            }
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Forbidden – You do not have access to this resource",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionDTO.class),
+                            examples = @ExampleObject(
+                                    name = "Access Denied",
+                                    summary = "User lacks required authorization",
+                                    value = """
+                {
+                  "status": 403,
+                  "exception": "AuthorizationDeniedException",
+                  "message": ["Access denied"]
+                }
+                """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Account not found",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionDTO.class),
+                            examples = @ExampleObject(
+                                    name = "Account Not Found",
+                                    summary = "Account not found error",
+                                    value = """
+                {
+                  "status": 404,
+                  "exception": "EntityNotFoundException",
+                  "message": ["Account not found with IBAN: NL91ABNA0417164300"]
+                }
+                """
+                            )
+                    )
+            )
+    })
     @DeleteMapping("/accounts/{iban}/close")
     @PreAuthorize("hasRole('EMPLOYEE')")
     public ResponseEntity<Void> closeAccount(@PathVariable String iban) {
