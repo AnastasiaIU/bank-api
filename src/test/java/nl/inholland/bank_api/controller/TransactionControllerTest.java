@@ -1,10 +1,7 @@
 package nl.inholland.bank_api.controller;
 
 import nl.inholland.bank_api.model.dto.TransactionRequestDTO;
-import nl.inholland.bank_api.service.AccountService;
-import nl.inholland.bank_api.service.CombinedTransactionService;
 import nl.inholland.bank_api.service.TransactionService;
-import nl.inholland.bank_api.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -29,15 +26,6 @@ class TransactionControllerTest {
 
     @MockitoBean
     private TransactionService transactionService;
-
-    @MockitoBean
-    private UserService userService;
-
-    @MockitoBean
-    private AccountService accountService;
-
-    @MockitoBean
-    private CombinedTransactionService combinedTransactionService;
 
     @Test
     void postTransaction_ReturnsCreatedId() throws Exception {
