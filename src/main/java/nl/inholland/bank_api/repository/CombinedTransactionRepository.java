@@ -39,7 +39,7 @@ public class CombinedTransactionRepository {
            at.timestamp,
             CAST(at.type AS VARCHAR),
            at.status
-    FROM atm_transactions at
+    FROM atm_transaction at
     LEFT JOIN account a ON at.account_id = a.id
 
     ORDER BY timestamp DESC
@@ -58,7 +58,7 @@ public class CombinedTransactionRepository {
         String sql = "SELECT COUNT(*) FROM (" +
                 "SELECT t.id FROM transaction t " +
                 "UNION ALL " +
-                "SELECT a.id FROM atm_transactions a" +
+                "SELECT a.id FROM atm_transaction a" +
                 ") AS combined";
 
         Object result = entityManager.createNativeQuery(sql).getSingleResult();
