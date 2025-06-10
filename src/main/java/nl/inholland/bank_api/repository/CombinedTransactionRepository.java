@@ -12,6 +12,11 @@ public class CombinedTransactionRepository {
     @PersistenceContext
     private EntityManager entityManager;
 
+    //used in unit testing
+    public void setEntityManager(EntityManager entityManager) {
+        this.entityManager = entityManager;
+    }
+
     public List<Object[]> findAllCombined(int size, int offset) {
         String sql = """
     SELECT sa.iban AS source_iban,
