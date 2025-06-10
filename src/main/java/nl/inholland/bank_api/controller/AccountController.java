@@ -3,6 +3,7 @@ package nl.inholland.bank_api.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -618,12 +619,50 @@ public class AccountController {
         return ResponseEntity.ok().build();
     }
 
+
+    @ApiResponse(
+            responseCode = "200",
+            description = "Accounts successfully created",
+            content = @Content(
+                    mediaType = "application/json",
+                    array = @ArraySchema(schema = @Schema(implementation = AccountWithUserDTO.class)),
+                    examples = @ExampleObject(
+                            name = "Accounts Created",
+                            summary = "List of two created accounts",
+                            value = """
+            [
+              {
+                "iban": "NL91ABNA0417164300",
+                "type": "CHECKING",
+                "balance": 1000,
+                "firstName": "Alice",
+                "lastName": "Smith",
+                "dailyLimit": 5000,
+                "absoluteLimit": -200,
+                "withdrawLimit": 3000
+              },
+              {
+                "iban": "NL91ABNA0417164301",
+                "type": "SAVINGS",
+                "balance": 5000,
+                "firstName": "Alice",
+                "lastName": "Smith",
+                "dailyLimit": 3000,
+                "absoluteLimit": -100,
+                "withdrawLimit": 1500
+              }
+            ]
+            """
+                    )
+            )
+    )
     @GetMapping("/users/{id}/accounts/review")
     @PreAuthorize("hasRole('EMPLOYEE')")
     public ResponseEntity<List<AccountWithUserDTO>> createDefaultAccounts(@PathVariable Long id) {
         List<AccountWithUserDTO> accounts = accountService.createAccountsByUserId(id);
         return ResponseEntity.ok(accounts);
     }
+
 
     @DeleteMapping("/accounts/{iban}/close")
     @PreAuthorize("hasRole('EMPLOYEE')")

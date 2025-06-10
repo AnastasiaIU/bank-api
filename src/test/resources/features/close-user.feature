@@ -4,7 +4,7 @@ Feature: Close a customer account
   So that the user and all their accounts are deactivated
 
   Scenario: Successfully close a user account
-    Given I am logged in with email "admin@mail.com" and password "admin"
+    Given I am logged in as EMPLOYEE
     And a registered customer with active accounts
     When I close the user account via PUT "/users/{id}/close"
     Then the response status should be 204

@@ -35,7 +35,7 @@ public class PendingUsersSteps {
                 .lastName("User1")
                 .email("pending1@mail.com")
                 .password("Password123!")
-                .bsn("111111111")
+                .bsn("111111119")
                 .phoneNumber("+31611111111")
                 .role(UserRole.CUSTOMER)
                 .isApproved(UserAccountStatus.PENDING)
@@ -46,7 +46,7 @@ public class PendingUsersSteps {
                 .lastName("User2")
                 .email("pending2@mail.com")
                 .password("Password123!")
-                .bsn("222222222")
+                .bsn("222222223")
                 .phoneNumber("+31622222222")
                 .role(UserRole.CUSTOMER)
                 .isApproved(UserAccountStatus.PENDING)
@@ -55,8 +55,8 @@ public class PendingUsersSteps {
         testUsers = userRepository.saveAll(List.of(user1, user2));
     }
 
-    @When("I send a GET request to {string}")
-    public void sendGetRequest(String endpoint) {
+    @When("I request the list of pending users from {string}")
+    public void sendPendingUsersRequest(String endpoint) {
         HttpEntity<Void> entity = new HttpEntity<>(context.getHeaders());
         ResponseEntity<String> response = restTemplate.exchange(endpoint, HttpMethod.GET, entity, String.class);
         context.setResponse(response);
@@ -67,12 +67,14 @@ public class PendingUsersSteps {
         JsonNode json = context.getObjectMapper().readTree(context.getResponse().getBody());
 
         assertThat(json.isArray()).isTrue();
-        assertThat(json).hasSizeGreaterThanOrEqualTo(testUsers.size());
 
-        List<String> expectedEmails = testUsers.stream().map(User::getEmail).toList();
-        for (JsonNode userNode : json) {
-            String email = userNode.get("email").asText();
-            assertThat(expectedEmails).contains(email);
-        }
+        List<String> expectedEmails = testUsers.stream()
+                .map(User::getEmail)
+                .toList();
+
+        List<String> actualEmails = new java.util.ArrayList<>();
+        json.forEach(node -> actualEmails.add(node.get("email").asText()));
+
+        assertThat(actualEmails).containsAll(expectedEmails);
     }
 }
