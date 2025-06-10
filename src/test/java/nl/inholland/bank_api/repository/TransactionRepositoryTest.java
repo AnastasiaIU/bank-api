@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -79,6 +80,78 @@ public class TransactionRepositoryTest {
 
         BigDecimal total = repository.sumAmountForAccountToday(account.getId(), LocalDate.now());
         assertThat(total).isEqualByComparingTo("150");
+    }
+
+    @Test
+    void findBySourceOrTargetAccountId_ReturnsMatchingTransactions() {
+        User user = User.builder()
+                .firstName("Alice").lastName("Smith")
+                .email("alice@test.com").password("password")
+                .bsn("987654321").phoneNumber("+2222222222")
+                .isApproved(UserAccountStatus.APPROVED)
+                .role(UserRole.CUSTOMER)
+                .build();
+        userRepository.save(user);
+
+        Account source = Account.builder()
+                .user(user)
+                .status(AccountStatus.ACTIVE)
+                .iban("NL01INHO0000000001")
+                .type(AccountType.CHECKING)
+                .balance(new BigDecimal("500"))
+                .absoluteLimit(BigDecimal.ZERO)
+                .withdrawLimit(new BigDecimal("1000"))
+                .dailyLimit(new BigDecimal("1000"))
+                .build();
+        accountRepository.save(source);
+
+        Account target = Account.builder()
+                .user(user)
+                .status(AccountStatus.ACTIVE)
+                .iban("NL01INHO0000000002")
+                .type(AccountType.SAVINGS)
+                .balance(new BigDecimal("300"))
+                .absoluteLimit(BigDecimal.ZERO)
+                .withdrawLimit(new BigDecimal("1000"))
+                .dailyLimit(new BigDecimal("1000"))
+                .build();
+        accountRepository.save(target);
+
+        Transaction t1 = new Transaction();
+        t1.setSourceAccount(source);
+        t1.setTargetAccount(target);
+        t1.setInitiatedBy(user);
+        t1.setAmount(BigDecimal.valueOf(100));
+        t1.setDescription("Transfer 1");
+        t1.setStatus(Status.SUCCEEDED);
+        t1.setTimestamp(LocalDateTime.now());
+        repository.save(t1);
+
+        Transaction t2 = new Transaction();
+        t2.setSourceAccount(target);
+        t2.setTargetAccount(source);
+        t2.setInitiatedBy(user);
+        t2.setAmount(BigDecimal.valueOf(200));
+        t2.setDescription("Transfer 2");
+        t2.setStatus(Status.SUCCEEDED);
+        t2.setTimestamp(LocalDateTime.now());
+        repository.save(t2);
+
+        Transaction t3 = new Transaction();
+        t3.setSourceAccount(target);
+        t3.setTargetAccount(target);
+        t3.setInitiatedBy(user);
+        t3.setAmount(BigDecimal.valueOf(300));
+        t3.setDescription("Transfer 3");
+        t3.setStatus(Status.SUCCEEDED);
+        t3.setTimestamp(LocalDateTime.now());
+        repository.save(t3);
+
+        List<Transaction> results = repository.findBySourceAccount_IdOrTargetAccount_Id(source.getId(), source.getId());
+
+        assertThat(results).hasSize(2);
+        assertThat(results).anyMatch(t -> t.getDescription().equals("Transfer 1"));
+        assertThat(results).anyMatch(t -> t.getDescription().equals("Transfer 2"));
     }
 
     // Comment out @CreationTimestamp and @Column(updatable = false) annotations

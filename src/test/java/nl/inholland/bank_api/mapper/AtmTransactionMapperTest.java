@@ -2,6 +2,7 @@ package nl.inholland.bank_api.mapper;
 
 import nl.inholland.bank_api.model.dto.AtmTransactionDTO;
 import nl.inholland.bank_api.model.dto.AtmTransactionRequestDTO;
+import nl.inholland.bank_api.model.dto.CombinedTransactionDTO;
 import nl.inholland.bank_api.model.entities.Account;
 import nl.inholland.bank_api.model.entities.AtmTransaction;
 import nl.inholland.bank_api.model.entities.User;
@@ -67,5 +68,61 @@ class AtmTransactionMapperTest {
         assertEquals(entity.getTimestamp(), dto.timestamp());
         assertEquals(entity.getStatus().name(), dto.status());
         assertNull(dto.failureReason());
+    }
+
+    @Test
+    void toCombinedDTO_MapsWithdrawFieldsCorrectly() {
+        Account account = new Account();
+        account.setIban("NL01INHO0000000001");
+
+        AtmTransaction transaction = AtmTransaction.builder()
+                .id(10L)
+                .account(account)
+                .type(AtmTransactionType.WITHDRAW)
+                .amount(BigDecimal.valueOf(100))
+                .timestamp(LocalDateTime.now())
+                .status(Status.SUCCEEDED)
+                .failureReason(null)
+                .build();
+
+        CombinedTransactionDTO dto = mapper.toCombinedDTO(transaction);
+
+        assertEquals(10L, dto.id);
+        assertEquals("ATM", dto.type);
+        assertEquals("NL01INHO0000000001", dto.sourceIban);
+        assertNull(dto.targetIban);
+        assertEquals(transaction.getAmount(), dto.amount);
+        assertEquals(transaction.getTimestamp(), dto.timestamp);
+        assertEquals(transaction.getStatus(), dto.status);
+        assertNull(dto.failureReason);
+        assertEquals("WITHDRAW", dto.description);
+    }
+
+    @Test
+    void toCombinedDTO_MapsDepositFieldsCorrectly() {
+        Account account = new Account();
+        account.setIban("NL01INHO0000000002");
+
+        AtmTransaction transaction = AtmTransaction.builder()
+                .id(11L)
+                .account(account)
+                .type(AtmTransactionType.DEPOSIT)
+                .amount(BigDecimal.valueOf(250))
+                .timestamp(LocalDateTime.now())
+                .status(Status.SUCCEEDED)
+                .failureReason("None")
+                .build();
+
+        CombinedTransactionDTO dto = mapper.toCombinedDTO(transaction);
+
+        assertEquals(11L, dto.id);
+        assertEquals("ATM", dto.type);
+        assertNull(dto.sourceIban);
+        assertEquals("NL01INHO0000000002", dto.targetIban);
+        assertEquals(transaction.getAmount(), dto.amount);
+        assertEquals(transaction.getTimestamp(), dto.timestamp);
+        assertEquals(transaction.getStatus(), dto.status);
+        assertEquals("None", dto.failureReason);
+        assertEquals("DEPOSIT", dto.description);
     }
 }
