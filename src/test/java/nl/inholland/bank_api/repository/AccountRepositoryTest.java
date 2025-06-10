@@ -123,4 +123,81 @@ class AccountRepositoryTest {
         assertThat(result).hasSize(1);
         assertThat(result.get(0).getUser().getId()).isEqualTo(user2.getId());
     }
+
+    @Test
+    void findByUserIdShouldReturnAccounts() {
+        User testUser = User.builder()
+                .firstName("Jane")
+                .lastName("Doe")
+                .email("jane.doe@example.com")
+                .password("pw")
+                .bsn("123456789")
+                .phoneNumber("+31612345678")
+                .isApproved(UserAccountStatus.APPROVED)
+                .role(UserRole.CUSTOMER)
+                .build();
+        userRepository.save(testUser);
+
+        Account checkingAccount = Account.builder()
+                .iban("NL01INHO0123456789")
+                .type(AccountType.CHECKING)
+                .status(AccountStatus.ACTIVE)
+                .balance(BigDecimal.valueOf(1000))
+                .dailyLimit(BigDecimal.valueOf(500))
+                .withdrawLimit(BigDecimal.valueOf(200))
+                .absoluteLimit(BigDecimal.ZERO)
+                .user(testUser)
+                .build();
+
+        Account savingsAccount = Account.builder()
+                .iban("NL02INHO0123456789")
+                .type(AccountType.SAVINGS)
+                .status(AccountStatus.ACTIVE)
+                .balance(BigDecimal.valueOf(2000))
+                .dailyLimit(BigDecimal.valueOf(1000))
+                .withdrawLimit(BigDecimal.ZERO)
+                .absoluteLimit(BigDecimal.ZERO)
+                .user(testUser)
+                .build();
+
+        accountRepository.saveAll(List.of(checkingAccount, savingsAccount));
+
+        List<Account> accounts = accountRepository.findByUserId(testUser.getId());
+
+        assertThat(accounts).hasSize(2);
+        assertThat(accounts).extracting(Account::getIban)
+                .containsExactlyInAnyOrder("NL01INHO0123456789", "NL02INHO0123456789");
+    }
+
+    @Test
+    void findByIbanShouldReturnAccount() {
+        User testUser = User.builder()
+                .firstName("Jane")
+                .lastName("Doe")
+                .email("jane.doe@example.com")
+                .password("pw")
+                .bsn("123456789")
+                .phoneNumber("+31612345678")
+                .isApproved(UserAccountStatus.APPROVED)
+                .role(UserRole.CUSTOMER)
+                .build();
+        userRepository.save(testUser);
+
+        Account account = Account.builder()
+                .iban("NL01INHO0123456789")
+                .type(AccountType.CHECKING)
+                .status(AccountStatus.ACTIVE)
+                .balance(BigDecimal.valueOf(1000))
+                .dailyLimit(BigDecimal.valueOf(500))
+                .withdrawLimit(BigDecimal.valueOf(200))
+                .absoluteLimit(BigDecimal.ZERO)
+                .user(testUser)
+                .build();
+        accountRepository.save(account);
+
+        Optional<Account> result = accountRepository.findByIban("NL01INHO0123456789");
+
+        assertThat(result).isPresent();
+        assertThat(result.get().getUser().getEmail()).isEqualTo("jane.doe@example.com");
+    }
 }

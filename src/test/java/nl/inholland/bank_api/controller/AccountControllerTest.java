@@ -165,6 +165,68 @@ public class AccountControllerTest {
     }
 
     @Test
+    void fetchAccountsByUserId_ReturnsListOfAccountDTOs() throws Exception {
+        AccountDTO dto1 = new AccountDTO();
+        dto1.setIban("NL01INHO0000000001");
+        dto1.setStatus("ACTIVE");
+        dto1.setType("CHECKING");
+        dto1.setBalance(BigDecimal.valueOf(1000));
+
+        AccountDTO dto2 = new AccountDTO();
+        dto2.setIban("NL02INHO0000000002");
+        dto2.setStatus("ACTIVE");
+        dto2.setType("SAVINGS");
+        dto2.setBalance(BigDecimal.valueOf(5000));
+
+        when(accountService.fetchAccountsByUserId(1L)).thenReturn(List.of(dto1, dto2));
+
+        mockMvc.perform(get("/users/1/accounts")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].iban").value("NL01INHO0000000001"))
+                .andExpect(jsonPath("$[1].iban").value("NL02INHO0000000002"));
+    }
+
+    @Test
+    void createDefaultAccounts_ReturnsTwoAccountsWithUserInfo() throws Exception {
+        AccountWithUserDTO acc1 = new AccountWithUserDTO();
+        acc1.iban = "NL91ABNA0417164300";
+        acc1.firstName = "Alice";
+        acc1.lastName = "Smith";
+        acc1.type = "CHECKING";
+        acc1.balance = BigDecimal.ZERO;
+
+        AccountWithUserDTO acc2 = new AccountWithUserDTO();
+        acc2.iban = "NL91ABNA0417164301";
+        acc2.firstName = "Alice";
+        acc2.lastName = "Smith";
+        acc2.type = "SAVINGS";
+        acc2.balance = BigDecimal.ZERO;
+
+        when(accountService.createAccountsByUserId(1L)).thenReturn(List.of(acc1, acc2));
+
+        mockMvc.perform(get("/users/1/accounts/review")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].iban").value("NL91ABNA0417164300"))
+                .andExpect(jsonPath("$[1].iban").value("NL91ABNA0417164301"))
+                .andExpect(jsonPath("$[0].type").value("CHECKING"))
+                .andExpect(jsonPath("$[1].type").value("SAVINGS"));
+    }
+
+    @Test
+    void closeAccountByIban_ReturnsNoContent() throws Exception {
+        String iban = "NL91ABNA0417164300";
+
+        doNothing().when(accountService).closeAccountByIban(iban);
+
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+                        .delete("/accounts/{iban}/close", iban))
+                .andExpect(status().isNoContent());
+
+        verify(accountService).closeAccountByIban(iban);
+    }
+    @Test
     void fetchAccountsByName_ReturnsListOfAccountDTO() throws Exception {
         String firstName = "John";
         String lastName = "Doe";
