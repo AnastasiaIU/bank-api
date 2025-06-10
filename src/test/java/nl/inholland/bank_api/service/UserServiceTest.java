@@ -19,10 +19,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.ArrayList;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -214,4 +216,47 @@ class UserServiceTest {
         verify(jwtUtil, never()).generateToken(any(), any(), any());
     }
 
+    @Test
+    void shouldReturnUserWhenIdExists() {
+        // Arrange
+        Long userId = 1L;
+
+        User expectedUser = User.builder()
+                .id(userId)
+                .firstName("John")
+                .lastName("Doe")
+                .email("john.doe@example.com")
+                .password("hashed_password")
+                .bsn("123456789")
+                .phoneNumber("0612345678")
+                .isApproved(UserAccountStatus.APPROVED)
+                .role(UserRole.CUSTOMER)
+                .accounts(new ArrayList<>())
+                .build();
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(expectedUser));
+
+        // Act
+        User result = userService.getUserById(userId);
+
+        // Assert
+        assertEquals(expectedUser, result);
+        verify(userRepository).findById(userId);
+    }
+
+    @Test
+    void shouldThrowExceptionWhenUserNotFound() {
+        // Arrange
+        Long userId = 999L;
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        UsernameNotFoundException exception = assertThrows(
+                UsernameNotFoundException.class,
+                () -> userService.getUserById(userId)
+        );
+
+        assertEquals("User not found with id: " + userId, exception.getMessage());
+        verify(userRepository).findById(userId);
+    }
 }

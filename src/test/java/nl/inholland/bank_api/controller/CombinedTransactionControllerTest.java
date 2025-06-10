@@ -4,8 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.inholland.bank_api.constant.ErrorMessages;
 import nl.inholland.bank_api.exception.GlobalExceptionHandler;
 import nl.inholland.bank_api.model.dto.CombinedTransactionDTO;
+import nl.inholland.bank_api.model.dto.CombinedTransactionFullHistoryDTO;
 import nl.inholland.bank_api.model.dto.TransactionFilterDTO;
 import nl.inholland.bank_api.model.entities.User;
+import nl.inholland.bank_api.model.enums.Status;
 import nl.inholland.bank_api.model.enums.UserRole;
 import nl.inholland.bank_api.service.AccountService;
 import nl.inholland.bank_api.service.CombinedTransactionService;
@@ -27,6 +29,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.hamcrest.Matchers.*;
@@ -155,4 +159,46 @@ public class CombinedTransactionControllerTest {
                 .andExpect(jsonPath("$.content[1].id").value(2));
     }
 
+    @Test
+    void getAllCombinedTransactions_ReturnsPaginatedTransactions() throws Exception {
+        CombinedTransactionFullHistoryDTO tx1 = new CombinedTransactionFullHistoryDTO(
+                "NL91ABNA0417164300",
+                "NL91ABNA0417164301",
+                1L,
+                new BigDecimal("250.00"),
+                LocalDateTime.parse("2025-06-09T14:20:00"),
+                "TRANSFER",
+                Status.SUCCEEDED
+        );
+
+        CombinedTransactionFullHistoryDTO tx2 = new CombinedTransactionFullHistoryDTO(
+                "NL91ABNA0417164300",
+                null,
+                1L,
+                new BigDecimal("100.00"),
+                LocalDateTime.parse("2025-06-09T13:10:00"),
+                "WITHDRAW",
+                Status.SUCCEEDED
+        );
+
+        List<CombinedTransactionFullHistoryDTO> content = List.of(tx1, tx2);
+        Page<CombinedTransactionFullHistoryDTO> page = new PageImpl<>(content, PageRequest.of(0, 10), 2);
+
+        when(combinedTransactionService.getAllCombinedTransactions(PageRequest.of(0, 10))).thenReturn(page);
+
+        mockMvc.perform(get("/combined-transactions")
+                        .param("page", "0")
+                        .param("size", "10")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].sourceIban").value("NL91ABNA0417164300"))
+                .andExpect(jsonPath("$.content[0].targetIban").value("NL91ABNA0417164301"))
+                .andExpect(jsonPath("$.content[0].initiatedBy").value(1))
+                .andExpect(jsonPath("$.content[0].amount").value(250.00))
+                .andExpect(jsonPath("$.content[0].type").value("TRANSFER"))
+                .andExpect(jsonPath("$.content[0].status").value("SUCCEEDED"))
+                .andExpect(jsonPath("$.content[1].type").value("WITHDRAW"))
+                .andExpect(jsonPath("$.totalElements").value(2))
+                .andExpect(jsonPath("$.totalPages").value(1));
+    }
 }

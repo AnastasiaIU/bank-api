@@ -2,7 +2,6 @@ package nl.inholland.bank_api.mapper;
 
 import nl.inholland.bank_api.model.dto.CombinedTransactionDTO;
 import nl.inholland.bank_api.model.dto.TransactionRequestDTO;
-import nl.inholland.bank_api.model.dto.TransactionResponseDTO;
 import nl.inholland.bank_api.model.entities.Account;
 import nl.inholland.bank_api.model.entities.Transaction;
 import nl.inholland.bank_api.model.entities.User;

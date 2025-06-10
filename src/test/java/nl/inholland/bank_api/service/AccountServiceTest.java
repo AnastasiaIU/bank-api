@@ -3,9 +3,14 @@ package nl.inholland.bank_api.service;
 import jakarta.persistence.EntityNotFoundException;
 import nl.inholland.bank_api.constant.ErrorMessages;
 import nl.inholland.bank_api.mapper.AccountMapper;
+import nl.inholland.bank_api.model.dto.AccountDTO;
 import nl.inholland.bank_api.model.dto.AccountWithUserDTO;
 import nl.inholland.bank_api.model.dto.UpdateAccountLimitsDTO;
 import nl.inholland.bank_api.model.entities.Account;
+import nl.inholland.bank_api.model.entities.User;
+import nl.inholland.bank_api.model.enums.AccountStatus;
+import nl.inholland.bank_api.model.enums.AccountType;
+import nl.inholland.bank_api.model.enums.Operation;
 import nl.inholland.bank_api.repository.AccountRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -121,5 +126,104 @@ public class AccountServiceTest {
 
         // Verify that the save method was called on the repository with the updated account
         verify(accountRepository).save(account);
+    }
+
+    @Test
+    void shouldAddAmountToBalanceAndSaveAccount() {
+        // Arrange
+        Account account = new Account();
+        account.setBalance(new BigDecimal("100.00"));
+
+        BigDecimal amountToAdd = new BigDecimal("50.00");
+
+        // Act
+        accountService.updateBalance(account, amountToAdd, Operation.ADDITION);
+
+        // Assert
+        assertEquals(new BigDecimal("150.00"), account.getBalance());
+        verify(accountRepository, times(1)).save(account);
+    }
+
+    @Test
+    void shouldSubtractAmountFromBalanceAndSaveAccount() {
+        // Arrange
+        Account account = new Account();
+        account.setBalance(new BigDecimal("200.00"));
+
+        BigDecimal amountToSubtract = new BigDecimal("75.00");
+
+        // Act
+        accountService.updateBalance(account, amountToSubtract, Operation.SUBTRACTION);
+
+        // Assert
+        assertEquals(new BigDecimal("125.00"), account.getBalance());
+        verify(accountRepository, times(1)).save(account);
+    }
+
+    @Test
+    void shouldReturnOnlyCheckingAccountsWithMatchingNameAndExcludeUserId() {
+        // Arrange
+        Long excludedId = 5L;
+
+        Account checkingAccount = new Account();
+        checkingAccount.setType(AccountType.CHECKING);
+        checkingAccount.setIban("NL91ABNA0417164300");
+        checkingAccount.setStatus(AccountStatus.ACTIVE);
+
+        Account savingsAccount = new Account();
+        savingsAccount.setType(AccountType.SAVINGS);
+        savingsAccount.setIban("NL91ABNA0417164301");
+        checkingAccount.setStatus(AccountStatus.CLOSED);
+
+        List<Account> allAccounts = List.of(checkingAccount, savingsAccount);
+
+        when(accountRepository.findByFirstNameAndLastName("John", "Doe", excludedId))
+                .thenReturn(allAccounts);
+
+        // Act
+        List<AccountDTO> result = accountService.fetchAccountsByName("John", "Doe", excludedId);
+
+        // Assert
+        assertEquals(1, result.size());
+        assertEquals("NL91ABNA0417164300", result.get(0).getIban());
+
+        verify(accountRepository).findByFirstNameAndLastName("John", "Doe", excludedId);
+    }
+
+    @Test
+    void shouldReturnOnlyCheckingAccountsForGivenUserId() {
+        // Arrange
+        Long userId = 1L;
+
+        User user = new User();
+        user.setId(userId);
+
+        Account checkingAccount = new Account();
+        checkingAccount.setUser(user);
+        checkingAccount.setType(AccountType.CHECKING);
+        checkingAccount.setId(100L);
+        checkingAccount.setBalance(BigDecimal.valueOf(1000));
+        checkingAccount.setIban("NL01BANK0123456789");
+        checkingAccount.setStatus(AccountStatus.ACTIVE);
+
+        Account savingsAccount = new Account();
+        savingsAccount.setUser(user);
+        savingsAccount.setType(AccountType.SAVINGS);
+        savingsAccount.setId(101L);
+        savingsAccount.setBalance(BigDecimal.valueOf(5000));
+        savingsAccount.setIban("NL02BANK9876543210");
+        savingsAccount.setStatus(AccountStatus.ACTIVE);
+
+        List<Account> mockAccounts = List.of(checkingAccount, savingsAccount);
+
+        when(accountRepository.findByUserId(userId)).thenReturn(mockAccounts);
+
+        // Act
+        List<AccountDTO> result = accountService.fetchCheckingAccountsByUserId(userId);
+
+        // Assert
+        assertEquals(1, result.size());
+        assertEquals("NL01BANK0123456789", result.get(0).getIban());
+        verify(accountRepository).findByUserId(userId);
     }
 }

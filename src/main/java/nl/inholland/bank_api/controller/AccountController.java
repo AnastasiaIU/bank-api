@@ -1,6 +1,8 @@
 package nl.inholland.bank_api.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -32,11 +34,110 @@ public class AccountController {
         this.accountService = accountService;
     }
 
+    @Operation(
+            summary = "Fetch account by IBAN",
+            description = "Retrieve the account details of a specific IBAN."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Account retrieved successfully",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = AccountDTO.class),
+                            examples = @ExampleObject(
+                                    name = "Account Example",
+                                    summary = "Example account details",
+                                    value = """
+                {
+                  "iban": "NL91ABNA0417164300",
+                  "type": "CHECKING",
+                  "status": "ACTIVE",
+                  "balance": 10000.00,
+                  "absoluteLimit": -300.00,
+                  "withdrawLimit": 3000.00,
+                  "dailyLimit": 5000.00
+                }
+                """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Forbidden – You do not have permission to access this account",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionDTO.class),
+                            examples = @ExampleObject(
+                                    name = "Access Denied",
+                                    summary = "User lacks required authorization",
+                                    value = """
+                {
+                  "status": 403,
+                  "exception": "AuthorizationDeniedException",
+                  "message": ["Access denied"]
+                }
+                """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized – JWT token is missing, invalid, expired, or malformed",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionDTO.class),
+                            examples = {
+                                    @ExampleObject(
+                                            name = "Expired Token",
+                                            summary = "JWT token is expired",
+                                            value = """
+                    {
+                      "status": 401,
+                      "exception": "ExpiredJwtException",
+                      "message": ["Expired Token"]
+                    }
+                    """
+                                    ),
+                                    @ExampleObject(
+                                            name = "Missing Token",
+                                            summary = "JWT token or Authorization header is missing",
+                                            value = """
+                    {
+                      "status": 401,
+                      "exception": "JwtException",
+                      "message": ["Missing token or Authorization header"]
+                    }
+                    """
+                                    ),
+                                    @ExampleObject(
+                                            name = "Malformed Token",
+                                            summary = "JWT token is malformed",
+                                            value = """
+                    {
+                      "status": 401,
+                      "exception": "MalformedJwtException",
+                      "message": ["Malformed token"]
+                    }
+                    """
+                                    )
+                            }
+                    )
+            )
+    })
     @GetMapping("/accounts/{iban}")
-    public ResponseEntity<AccountDTO> fetchAccountByIban(@PathVariable String iban) {
+    public ResponseEntity<AccountDTO> fetchAccountByIban(
+            @Parameter(
+                    description = "The IBAN of the account to retrieve",
+                    required = true,
+                    example = "NL91ABNA0417164300"
+            )
+            @PathVariable String iban
+    ) {
         AccountDTO account = accountService.fetchAccountDTOByIban(iban);
         return ResponseEntity.ok(account);
     }
+
 
     @GetMapping("/users/{userId}/accounts")
     public ResponseEntity<List<AccountDTO>> fetchAccountsByUserId(@PathVariable Long userId) {
@@ -44,14 +145,216 @@ public class AccountController {
         return ResponseEntity.ok(accounts);
     }
 
+    @Operation(
+            summary = "Get all checking accounts for a user (EMPLOYEE or OWNER only)",
+            description = "Retrieve all active checking accounts belonging to a specific user ID. Only employees or the user themselves are allowed access."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Checking accounts retrieved successfully",
+                    content = @Content(
+                            mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(implementation = AccountDTO.class)),
+                            examples = @ExampleObject(
+                                    name = "Checking Accounts List",
+                                    summary = "List of checking accounts for a user",
+                                    value = """
+                [
+                  {
+                    "iban": "NL91ABNA0417164300",
+                    "type": "CHECKING",
+                    "status": "ACTIVE",
+                    "balance": 10000.00,
+                    "absoluteLimit": -300.00,
+                    "withdrawLimit": 3000.00,
+                    "dailyLimit": 5000.00
+                  }
+                ]
+                """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Forbidden – You do not have permission to access these accounts",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionDTO.class),
+                            examples = @ExampleObject(
+                                    name = "Access Denied",
+                                    summary = "User lacks required authorization",
+                                    value = """
+                {
+                  "status": 403,
+                  "exception": "AuthorizationDeniedException",
+                  "message": ["Access denied"]
+                }
+                """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized – JWT token is missing, invalid, expired, or malformed",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionDTO.class),
+                            examples = {
+                                    @ExampleObject(
+                                            name = "Expired Token",
+                                            summary = "JWT token is expired",
+                                            value = """
+                    {
+                      "status": 401,
+                      "exception": "ExpiredJwtException",
+                      "message": ["Expired Token"]
+                    }
+                    """
+                                    ),
+                                    @ExampleObject(
+                                            name = "Missing Token",
+                                            summary = "JWT token or Authorization header is missing",
+                                            value = """
+                    {
+                      "status": 401,
+                      "exception": "JwtException",
+                      "message": ["Missing token or Authorization header"]
+                    }
+                    """
+                                    ),
+                                    @ExampleObject(
+                                            name = "Malformed Token",
+                                            summary = "JWT token is malformed",
+                                            value = """
+                    {
+                      "status": 401,
+                      "exception": "MalformedJwtException",
+                      "message": ["Malformed token"]
+                    }
+                    """
+                                    )
+                            }
+                    )
+            )
+    })
     @GetMapping("/users/{userId}/checking-accounts")
-    public ResponseEntity<List<AccountDTO>> fetchCheckingAccountsByUserId(@PathVariable Long userId) {
-        List<AccountDTO> accounts =  accountService.fetchCheckingAccountsByUserId(userId);
+    public ResponseEntity<List<AccountDTO>> fetchCheckingAccountsByUserId(
+            @Parameter(
+                    description = "The ID of the user whose checking accounts are being requested",
+                    required = true,
+                    example = "1"
+            )
+            @PathVariable Long userId
+    ) {
+        List<AccountDTO> accounts = accountService.fetchCheckingAccountsByUserId(userId);
         return ResponseEntity.ok(accounts);
     }
 
+    @Operation(
+            summary = "Search accounts by name (excluding own ID)",
+            description = "Find accounts that belong to other users with a matching first and last name. The provided ID is used to exclude the requesting user's own account from the result — in case of name collisions."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Matching accounts retrieved successfully",
+                    content = @Content(
+                            mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(implementation = AccountDTO.class)),
+                            examples = @ExampleObject(
+                                    name = "Accounts by Name Excluding Own ID",
+                                    summary = "List of accounts with matching names, excluding your own",
+                                    value = """
+                [
+                  {
+                    "iban": "NL91ABNA0417164309",
+                    "type": "CHECKING",
+                    "status": "ACTIVE",
+                    "balance": 8700.00,
+                    "absoluteLimit": -300.00,
+                    "withdrawLimit": 1500.00,
+                    "dailyLimit": 4000.00
+                  }
+                ]
+                """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Forbidden – You do not have permission to access this resource",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionDTO.class),
+                            examples = @ExampleObject(
+                                    name = "Access Denied",
+                                    summary = "User lacks required authorization",
+                                    value = """
+                {
+                  "status": 403,
+                  "exception": "AuthorizationDeniedException",
+                  "message": ["Access denied"]
+                }
+                """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized – JWT token is missing, invalid, expired, or malformed",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ExceptionDTO.class),
+                            examples = {
+                                    @ExampleObject(
+                                            name = "Expired Token",
+                                            summary = "JWT token is expired",
+                                            value = """
+                    {
+                      "status": 401,
+                      "exception": "ExpiredJwtException",
+                      "message": ["Expired Token"]
+                    }
+                    """
+                                    ),
+                                    @ExampleObject(
+                                            name = "Missing Token",
+                                            summary = "JWT token or Authorization header is missing",
+                                            value = """
+                    {
+                      "status": 401,
+                      "exception": "JwtException",
+                      "message": ["Missing token or Authorization header"]
+                    }
+                    """
+                                    ),
+                                    @ExampleObject(
+                                            name = "Malformed Token",
+                                            summary = "JWT token is malformed",
+                                            value = """
+                    {
+                      "status": 401,
+                      "exception": "MalformedJwtException",
+                      "message": ["Malformed token"]
+                    }
+                    """
+                                    )
+                            }
+                    )
+            )
+    })
     @GetMapping("/users/accounts/{firstName}/{lastName}/{id}")
-    public ResponseEntity<List<AccountDTO>> fetchAccountsByName(@PathVariable String firstName, @PathVariable String lastName, @PathVariable Long id) {
+    public ResponseEntity<List<AccountDTO>> fetchAccountsByName(
+            @Parameter(description = "First name to search for", required = true, example = "John")
+            @PathVariable String firstName,
+
+            @Parameter(description = "Last name to search for", required = true, example = "Doe")
+            @PathVariable String lastName,
+
+            @Parameter(description = "Your user ID (will be excluded from results)", required = true, example = "2")
+            @PathVariable Long id
+    ) {
         List<AccountDTO> accounts = accountService.fetchAccountsByName(firstName, lastName, id);
         return ResponseEntity.ok(accounts);
     }

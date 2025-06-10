@@ -2,6 +2,7 @@ package nl.inholland.bank_api.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.inholland.bank_api.constant.ErrorMessages;
+import nl.inholland.bank_api.model.dto.AccountDTO;
 import nl.inholland.bank_api.model.dto.AccountWithUserDTO;
 import nl.inholland.bank_api.model.dto.UpdateAccountLimitsDTO;
 import nl.inholland.bank_api.service.AccountService;
@@ -71,7 +72,7 @@ public class AccountControllerTest {
         when(accountService.fetchAllAccounts(any(Pageable.class))).thenReturn(page);
 
         mockMvc.perform(get("/accounts")
-                        .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.content[0].iban").value("NL91ABNA0417164300"))
@@ -97,8 +98,8 @@ public class AccountControllerTest {
         String jsonRequest = objectMapper.writeValueAsString(dto);
 
         mockMvc.perform(put("/accounts/{iban}/limits", iban)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonRequest))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonRequest))
                 .andExpect(status().isOk());
 
         // Verify service method was called correctly
@@ -110,18 +111,79 @@ public class AccountControllerTest {
         String iban = "NL91ABNA0417164300";
 
         UpdateAccountLimitsDTO invalidDto = new UpdateAccountLimitsDTO();
-        invalidDto.setDailyLimit(new BigDecimal("-100"));    // invalid, less than 0
+        invalidDto.setDailyLimit(new BigDecimal("-100")); // invalid, less than 0
         invalidDto.setWithdrawLimit(new BigDecimal("-100")); // invalid, less than 0
         invalidDto.setAbsoluteLimit(new BigDecimal("-500"));
 
         mockMvc.perform(put("/accounts/{iban}/limits", iban)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(invalidDto)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(invalidDto)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message", hasItems(
                         StringUtils.fieldError("dailyLimit", ErrorMessages.DAILY_LIMIT_MINIMUM),
-                        StringUtils.fieldError("withdrawLimit", ErrorMessages.WITHDRAW_LIMIT_MINIMUM)
-                )));
+                        StringUtils.fieldError("withdrawLimit", ErrorMessages.WITHDRAW_LIMIT_MINIMUM))));
     }
 
+    @Test
+    void fetchAccountByIban_ReturnsAccountDTO() throws Exception {
+        String iban = "NL91ABNA0417164300";
+        AccountDTO accountDTO = new AccountDTO();
+        accountDTO.setIban(iban);
+        accountDTO.setType("CHECKING");
+        accountDTO.setStatus("ACTIVE");
+        accountDTO.setBalance(new BigDecimal("10000.00"));
+
+        when(accountService.fetchAccountDTOByIban(iban)).thenReturn(accountDTO);
+
+        mockMvc.perform(get("/accounts/{iban}", iban)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.iban").value(iban))
+                .andExpect(jsonPath("$.type").value("CHECKING"))
+                .andExpect(jsonPath("$.status").value("ACTIVE"))
+                .andExpect(jsonPath("$.balance").value(10000.00));
+    }
+
+    @Test
+    void fetchCheckingAccountsByUserId_ReturnsListOfAccountDTO() throws Exception {
+        Long userId = 1L;
+        AccountDTO accountDTO = new AccountDTO();
+        accountDTO.setIban("NL91ABNA0417164300");
+        accountDTO.setType("CHECKING");
+        accountDTO.setStatus("ACTIVE");
+        accountDTO.setBalance(new BigDecimal("10000.00"));
+
+        when(accountService.fetchCheckingAccountsByUserId(userId)).thenReturn(List.of(accountDTO));
+
+        mockMvc.perform(get("/users/{userId}/checking-accounts", userId)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].iban").value("NL91ABNA0417164300"))
+                .andExpect(jsonPath("$[0].type").value("CHECKING"))
+                .andExpect(jsonPath("$[0].status").value("ACTIVE"))
+                .andExpect(jsonPath("$[0].balance").value(10000.00));
+    }
+
+    @Test
+    void fetchAccountsByName_ReturnsListOfAccountDTO() throws Exception {
+        String firstName = "John";
+        String lastName = "Doe";
+        Long id = 2L;
+
+        AccountDTO accountDTO = new AccountDTO();
+        accountDTO.setIban("NL91ABNA0417164309");
+        accountDTO.setType("CHECKING");
+        accountDTO.setStatus("ACTIVE");
+        accountDTO.setBalance(new BigDecimal("8700.00"));
+
+        when(accountService.fetchAccountsByName(firstName, lastName, id)).thenReturn(List.of(accountDTO));
+
+        mockMvc.perform(get("/users/accounts/{firstName}/{lastName}/{id}", firstName, lastName, id)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].iban").value("NL91ABNA0417164309"))
+                .andExpect(jsonPath("$[0].type").value("CHECKING"))
+                .andExpect(jsonPath("$[0].status").value("ACTIVE"))
+                .andExpect(jsonPath("$[0].balance").value(8700.00));
+    }
 }

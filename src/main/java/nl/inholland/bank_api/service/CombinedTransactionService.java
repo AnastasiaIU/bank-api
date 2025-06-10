@@ -16,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -134,7 +135,14 @@ public class CombinedTransactionService {
         String targetIban = (String) row[1];
         Long initiatedBy = ((Number) row[2]).longValue();
         BigDecimal amount = (BigDecimal) row[3];
-        LocalDateTime timestamp = ((java.sql.Timestamp) row[4]).toLocalDateTime();
+        LocalDateTime timestamp;
+
+        if (row[4] instanceof Timestamp ts) {
+            timestamp = ts.toLocalDateTime();
+        } else {
+            timestamp = (LocalDateTime) row[4];
+        }
+
         String typeStr = (String) row[5];
         String statusStr = (String) row[6];
 
