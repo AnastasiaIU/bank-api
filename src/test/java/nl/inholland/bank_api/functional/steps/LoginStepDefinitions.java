@@ -29,6 +29,13 @@ public class LoginStepDefinitions {
         request.password = "123";
     }
 
+    @Given("a valid login payload for a closed or rejected user")
+    public void aValidLoginPayloadForClosedOrRejectedUser() {
+        request = new LoginRequestDTO();
+        request.email = "1234@mail.com";
+        request.password = "1234";
+    }
+
     @Given("a login payload with missing email and password")
     public void aLoginPayloadWithMissingFields() {
         request = new LoginRequestDTO(); // Both fields null
@@ -102,5 +109,15 @@ public class LoginStepDefinitions {
         assertThat(messages).isNotNull();
         assertThat(messages).hasSize(1);
         assertThat(messages.get(0).asText()).isEqualTo(ErrorMessages.INVALID_EMAIL_OR_PASSWORD);
+    }
+
+    @And("the login response should contain closed or rejected error")
+    public void theLoginResponseShouldContainClosedOrRejectedError() throws Exception {
+        JsonNode json =  context.getObjectMapper().readTree(context.getResponse().getBody());
+        JsonNode messages = json.get("message");
+
+        assertThat(messages).isNotNull();
+        assertThat(messages).hasSize(1);
+        assertThat(messages.get(0).asText()).isEqualTo("Unable to login, account is closed or rejected");
     }
 }

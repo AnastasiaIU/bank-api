@@ -1,9 +1,11 @@
 package nl.inholland.bank_api.service;
 import nl.inholland.bank_api.model.entities.User;
+import nl.inholland.bank_api.model.enums.UserAccountStatus;
 import nl.inholland.bank_api.model.enums.UserRole;
 import nl.inholland.bank_api.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,11 +46,27 @@ public class CustomUserDetailsServiceTest {
     }
 
     @Test
-    void loadUserByUsernameThrowsException() {
+    void loadUserByUsernameThrowsUsernameNotFoundException() {
         String email = "notfound@example.com";
         when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
 
         assertThrows(UsernameNotFoundException.class, () -> {
+            customUserDetailsService.loadUserByUsername(email);
+        });
+    }
+
+    @Test
+    void loadUserByUsernameThrowsDisabledException() {
+        String email = "user@example.com";
+        User user = User.builder()
+                .email(email)
+                .password("hashedPassword")
+                .role(UserRole.CUSTOMER)
+                .isApproved(UserAccountStatus.CLOSED)
+                .build();
+
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+        assertThrows(DisabledException.class, () -> {
             customUserDetailsService.loadUserByUsername(email);
         });
     }
