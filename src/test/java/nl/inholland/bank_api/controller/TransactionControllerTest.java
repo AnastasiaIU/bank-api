@@ -30,11 +30,11 @@ class TransactionControllerTest {
     @Test
     void postTransaction_ReturnsCreatedId() throws Exception {
         TransactionRequestDTO dto = new TransactionRequestDTO();
-        dto.sourceAccount = "NL91ABNA0417164300";
-        dto.targetAccount = "NL91ABNA0417164301";
-        dto.initiatedBy = 1L;
-        dto.amount = new BigDecimal("250.00");
-        dto.description = "Monthly savings";
+        dto.setSourceAccount("NL91ABNA0417164300");
+        dto.setTargetAccount("NL91ABNA0417164301");
+        dto.setInitiatedBy(1L);
+        dto.setAmount(new BigDecimal("250.00"));
+        dto.setDescription("Monthly savings");
 
         when(transactionService.postTransaction(any(TransactionRequestDTO.class))).thenReturn(42L);
 

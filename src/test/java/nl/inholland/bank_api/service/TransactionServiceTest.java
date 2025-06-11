@@ -34,11 +34,11 @@ class TransactionServiceTest {
     void postTransaction_ShouldSaveAndReturnTransactionId() {
         // Arrange
         TransactionRequestDTO dto = new TransactionRequestDTO();
-        dto.sourceAccount = "NL01BANK1234567890";
-        dto.targetAccount = "NL02BANK9876543210";
-        dto.initiatedBy = 1L;
-        dto.amount = new BigDecimal("250.00");
-        dto.description = "Test Transaction";
+        dto.setSourceAccount("NL01BANK1234567890");
+        dto.setTargetAccount("NL02BANK9876543210");
+        dto.setInitiatedBy(1L);
+        dto.setAmount(new BigDecimal("250.00"));
+        dto.setDescription("Test Transaction");
 
         Transaction mockTransaction = new Transaction();
         mockTransaction.setId(42L);

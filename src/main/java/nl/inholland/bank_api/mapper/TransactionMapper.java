@@ -44,20 +44,20 @@ public class TransactionMapper {
     public Transaction toEntity(TransactionRequestDTO dto) {
         Transaction transaction = new Transaction();
 
-        Account sourceAccount = accountService.fetchAccountByIban(dto.sourceAccount);
-        Account targetAccount = accountService.fetchAccountByIban(dto.targetAccount);
-        User initiatedBy = userService.getUserById(dto.initiatedBy);
+        Account sourceAccount = accountService.fetchAccountByIban(dto.getSourceAccount());
+        Account targetAccount = accountService.fetchAccountByIban(dto.getTargetAccount());
+        User initiatedBy = userService.getUserById(dto.getInitiatedBy());
 
         transaction.setSourceAccount(sourceAccount);
         transaction.setTargetAccount(targetAccount);
         transaction.setInitiatedBy(initiatedBy);
-        transaction.setAmount(dto.amount);
-        transaction.setDescription(dto.description);
+        transaction.setAmount(dto.getAmount());
+        transaction.setDescription(dto.getDescription());
 
-        if (isTransactionSuccessful(sourceAccount, targetAccount, dto.amount)) {
+        if (isTransactionSuccessful(sourceAccount, targetAccount, dto.getAmount())) {
             transaction.setStatus(Status.SUCCEEDED);
-            accountService.updateBalance(sourceAccount, dto.amount, Operation.SUBTRACTION);
-            accountService.updateBalance(targetAccount, dto.amount, Operation.ADDITION);
+            accountService.updateBalance(sourceAccount, dto.getAmount(), Operation.SUBTRACTION);
+            accountService.updateBalance(targetAccount, dto.getAmount(), Operation.ADDITION);
         } else {
             transaction.setStatus(Status.FAILED);
         }

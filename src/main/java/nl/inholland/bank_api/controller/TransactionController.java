@@ -10,14 +10,17 @@ import jakarta.validation.Valid;
 import nl.inholland.bank_api.model.dto.ExceptionDTO;
 import nl.inholland.bank_api.model.dto.TransactionRequestDTO;
 import nl.inholland.bank_api.service.TransactionService;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.Collections;
 
 @RestController
-@RequestMapping
+@RequestMapping("transactions")
+@Validated
 public class TransactionController {
     private final TransactionService transactionService;
 
@@ -28,7 +31,7 @@ public class TransactionController {
     @Operation(
             summary = "Post a new transaction",
             description = "Initiate a new bank transfer between two accounts. Requires a valid source and target IBAN, amount, and user initiating the transaction.",
-            requestBody = @RequestBody(
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     required = true,
                     content = @Content(
                             mediaType = "application/json",
@@ -124,7 +127,8 @@ public class TransactionController {
                     )
             )
     })
-    @PostMapping("/transactions")
+
+    @PostMapping()
     public ResponseEntity<?> postTransaction(@Valid @RequestBody TransactionRequestDTO dto) {
         Long id = transactionService.postTransaction(dto);
         return ResponseEntity.status(201).body(Collections.singletonMap("id", id));
