@@ -70,7 +70,7 @@ class CombinedTransactionRepositoryTest {
                 .initiatedBy(user)
                 .amount(BigDecimal.valueOf(123.45))
                 .status(Status.SUCCEEDED)
-                .timestamp(LocalDateTime.now().minusMinutes(1))
+                .timestamp(LocalDateTime.of(2025, 1, 1, 12, 0))
                 .description("Test transfer")
                 .build();
 
@@ -83,7 +83,7 @@ class CombinedTransactionRepositoryTest {
                 .type(AtmTransactionType.WITHDRAW)
                 .amount(BigDecimal.valueOf(50.00))
                 .status(Status.SUCCEEDED)
-                .timestamp(LocalDateTime.now())
+                .timestamp(LocalDateTime.of(2025, 1, 1, 12, 1))
                 .build();
 
         entityManager.persist(atmTx);
