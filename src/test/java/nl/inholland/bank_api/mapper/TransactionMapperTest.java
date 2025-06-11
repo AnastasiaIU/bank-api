@@ -34,11 +34,11 @@ class TransactionMapperTest {
 
     private TransactionRequestDTO getValidRequest() {
         TransactionRequestDTO dto = new TransactionRequestDTO();
-        dto.sourceAccount = "NL01INHO0000000001";
-        dto.targetAccount = "NL01INHO0000000002";
-        dto.amount = BigDecimal.valueOf(100);
-        dto.description = "Test payment";
-        dto.initiatedBy = 1L;
+        dto.setSourceAccount("NL01INHO0000000001");
+        dto.setTargetAccount("NL01INHO0000000002");
+        dto.setAmount(BigDecimal.valueOf(100));
+        dto.setDescription("Test payment");
+        dto.setInitiatedBy(1L);
         return dto;
     }
 
@@ -73,18 +73,18 @@ class TransactionMapperTest {
         TransactionRequestDTO dto = getValidRequest();
 
         Account source = new Account();
-        source.setIban(dto.sourceAccount);
+        source.setIban(dto.getSourceAccount());
         source.setBalance(BigDecimal.ZERO);
         source.setAbsoluteLimit(BigDecimal.ZERO);
 
         Account target = new Account();
-        target.setIban(dto.targetAccount);
+        target.setIban(dto.getTargetAccount());
 
-        User user = new User(); user.setId(dto.initiatedBy);
+        User user = new User(); user.setId(dto.getInitiatedBy());
 
-        when(accountService.fetchAccountByIban(dto.sourceAccount)).thenReturn(source);
-        when(accountService.fetchAccountByIban(dto.targetAccount)).thenReturn(target);
-        when(userService.getUserById(dto.initiatedBy)).thenReturn(user);
+        when(accountService.fetchAccountByIban(dto.getSourceAccount())).thenReturn(source);
+        when(accountService.fetchAccountByIban(dto.getTargetAccount())).thenReturn(target);
+        when(userService.getUserById(dto.getInitiatedBy())).thenReturn(user);
 
         Transaction transaction = mapper.toEntity(dto);
 
@@ -96,14 +96,14 @@ class TransactionMapperTest {
     void toEntity_ShouldMapAndSucceedTransaction_WhenLimitsAreValid() {
         // Arrange
         TransactionRequestDTO dto = new TransactionRequestDTO();
-        dto.sourceAccount = "NL01BANK0001";
-        dto.targetAccount = "NL01BANK0002";
-        dto.amount = new BigDecimal("100.00");
-        dto.description = "Rent";
-        dto.initiatedBy = 1L;
+        dto.setSourceAccount("NL01BANK0001");
+        dto.setTargetAccount("NL01BANK0002");
+        dto.setAmount(new BigDecimal("100.00"));
+        dto.setDescription("Rent");
+        dto.setInitiatedBy(1L);
 
         User sender = User.builder()
-                .id(dto.initiatedBy)
+                .id(dto.getInitiatedBy())
                 .firstName("John")
                 .lastName("Doe")
                 .email("123@mail.com")
@@ -127,7 +127,7 @@ class TransactionMapperTest {
 
         Account source = Account.builder()
                 .id(1L)
-                .iban(dto.sourceAccount)
+                .iban(dto.getSourceAccount())
                 .user(sender)
                 .balance(new BigDecimal("1000.00"))
                 .absoluteLimit(new BigDecimal("-200.00"))
@@ -138,7 +138,7 @@ class TransactionMapperTest {
 
         Account target = Account.builder()
                 .id(2L)
-                .iban(dto.targetAccount)
+                .iban(dto.getTargetAccount())
                 .user(receiver)
                 .balance(new BigDecimal("500.00"))
                 .absoluteLimit(new BigDecimal("5000.00"))
@@ -147,9 +147,9 @@ class TransactionMapperTest {
                 .type(AccountType.CHECKING)
                 .build();
 
-        when(accountService.fetchAccountByIban(dto.sourceAccount)).thenReturn(source);
-        when(accountService.fetchAccountByIban(dto.targetAccount)).thenReturn(target);
-        when(userService.getUserById(dto.initiatedBy)).thenReturn(sender);
+        when(accountService.fetchAccountByIban(dto.getSourceAccount())).thenReturn(source);
+        when(accountService.fetchAccountByIban(dto.getTargetAccount())).thenReturn(target);
+        when(userService.getUserById(dto.getInitiatedBy())).thenReturn(sender);
         when(transactionRepository.sumAmountForAccountToday(1L, LocalDate.now()))
                 .thenReturn(new BigDecimal("100.00"));
 
@@ -157,27 +157,27 @@ class TransactionMapperTest {
         Transaction result = mapper.toEntity(dto);
 
         // Assert
-        assertEquals(dto.sourceAccount, result.getSourceAccount().getIban());
-        assertEquals(dto.targetAccount, result.getTargetAccount().getIban());
-        assertEquals(dto.initiatedBy, result.getInitiatedBy().getId());
-        assertEquals(dto.amount, result.getAmount());
-        assertEquals(dto.description, result.getDescription());
+        assertEquals(dto.getSourceAccount(), result.getSourceAccount().getIban());
+        assertEquals(dto.getTargetAccount(), result.getTargetAccount().getIban());
+        assertEquals(dto.getInitiatedBy(), result.getInitiatedBy().getId());
+        assertEquals(dto.getAmount(), result.getAmount());
+        assertEquals(dto.getDescription(), result.getDescription());
         assertEquals(Status.SUCCEEDED, result.getStatus());
-        verify(accountService).updateBalance(source, dto.amount, Operation.SUBTRACTION);
-        verify(accountService).updateBalance(target, dto.amount, Operation.ADDITION);
+        verify(accountService).updateBalance(source, dto.getAmount(), Operation.SUBTRACTION);
+        verify(accountService).updateBalance(target, dto.getAmount(), Operation.ADDITION);
     }
 
     @Test
     void toEntity_ShouldFailTransaction_WhenAbsoluteLimitExceeded() {
         // Arrange
         TransactionRequestDTO dto = new TransactionRequestDTO();
-        dto.sourceAccount = "NL01BANK0001";
-        dto.targetAccount = "NL01BANK0002";
-        dto.amount = new BigDecimal("1200.00");
-        dto.initiatedBy = 1L;
+        dto.setSourceAccount("NL01BANK0001");
+        dto.setTargetAccount("NL01BANK0002");
+        dto.setAmount(new BigDecimal("1200.00"));
+        dto.setInitiatedBy(1L);
 
         User sender = User.builder()
-                .id(dto.initiatedBy)
+                .id(dto.getInitiatedBy())
                 .firstName("John")
                 .lastName("Doe")
                 .email("123@mail.com")
@@ -201,7 +201,7 @@ class TransactionMapperTest {
 
         Account source = Account.builder()
                 .id(1L)
-                .iban(dto.sourceAccount)
+                .iban(dto.getSourceAccount())
                 .user(sender)
                 .balance(new BigDecimal("1000.00"))
                 .absoluteLimit(new BigDecimal("-200.00"))
@@ -212,7 +212,7 @@ class TransactionMapperTest {
 
         Account target = Account.builder()
                 .id(2L)
-                .iban(dto.targetAccount)
+                .iban(dto.getTargetAccount())
                 .user(receiver)
                 .balance(new BigDecimal("500.00"))
                 .absoluteLimit(new BigDecimal("5000.00"))
@@ -221,9 +221,9 @@ class TransactionMapperTest {
                 .type(AccountType.CHECKING)
                 .build();
 
-        when(accountService.fetchAccountByIban(dto.sourceAccount)).thenReturn(source);
-        when(accountService.fetchAccountByIban(dto.targetAccount)).thenReturn(target);
-        when(userService.getUserById(dto.initiatedBy)).thenReturn(sender);
+        when(accountService.fetchAccountByIban(dto.getSourceAccount())).thenReturn(source);
+        when(accountService.fetchAccountByIban(dto.getTargetAccount())).thenReturn(target);
+        when(userService.getUserById(dto.getInitiatedBy())).thenReturn(sender);
         when(transactionRepository.sumAmountForAccountToday(1L, LocalDate.now())).thenReturn(BigDecimal.ZERO);
 
         // Act
@@ -238,13 +238,13 @@ class TransactionMapperTest {
     void toEntity_ShouldFailTransaction_WhenDailyLimitExceeded() {
         // Arrange
         TransactionRequestDTO dto = new TransactionRequestDTO();
-        dto.sourceAccount = "NL01BANK0001";
-        dto.targetAccount = "NL01BANK0002";
-        dto.amount = new BigDecimal("400.00");
-        dto.initiatedBy = 1L;
+        dto.setSourceAccount("NL01BANK0001");
+        dto.setTargetAccount("NL01BANK0002");
+        dto.setAmount(new BigDecimal("400.00"));
+        dto.setInitiatedBy(1L);
 
         User sender = User.builder()
-                .id(dto.initiatedBy)
+                .id(dto.getInitiatedBy())
                 .firstName("John")
                 .lastName("Doe")
                 .email("123@mail.com")
@@ -268,7 +268,7 @@ class TransactionMapperTest {
 
         Account source = Account.builder()
                 .id(1L)
-                .iban(dto.sourceAccount)
+                .iban(dto.getSourceAccount())
                 .user(sender)
                 .balance(new BigDecimal("1000.00"))
                 .absoluteLimit(new BigDecimal("-200.00"))
@@ -279,7 +279,7 @@ class TransactionMapperTest {
 
         Account target = Account.builder()
                 .id(2L)
-                .iban(dto.targetAccount)
+                .iban(dto.getTargetAccount())
                 .user(receiver)
                 .balance(new BigDecimal("500.00"))
                 .absoluteLimit(new BigDecimal("5000.00"))
@@ -288,9 +288,9 @@ class TransactionMapperTest {
                 .type(AccountType.CHECKING)
                 .build();
 
-        when(accountService.fetchAccountByIban(dto.sourceAccount)).thenReturn(source);
-        when(accountService.fetchAccountByIban(dto.targetAccount)).thenReturn(target);
-        when(userService.getUserById(dto.initiatedBy)).thenReturn(sender);
+        when(accountService.fetchAccountByIban(dto.getSourceAccount())).thenReturn(source);
+        when(accountService.fetchAccountByIban(dto.getTargetAccount())).thenReturn(target);
+        when(userService.getUserById(dto.getInitiatedBy())).thenReturn(sender);
         when(transactionRepository.sumAmountForAccountToday(1L, LocalDate.now()))
                 .thenReturn(new BigDecimal("200.00"));
 
